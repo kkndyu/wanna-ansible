@@ -1,0 +1,9 @@
+# test.yml
+---
+- hosts: all
+  tasks:
+    - name: ping all
+      command: ping www.baidu.com -c 10
+      register: out
+
+    - debug: var=out.stdout_lines

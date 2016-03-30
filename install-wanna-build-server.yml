@@ -1,0 +1,13 @@
+# test.yml
+---
+- name: install wanna build 
+  hosts: wanna-build-server-test
+  tasks:
+    - name: copy wanna-build src
+      copy: src=./scripts/wanna-build-source-2015-05-21.tar.gz  dest=/tmp/wanna-build-source.tar.gz
+      
+    - name: install sudo
+      apt: name=sudo
+      register: out
+
+    - debug: var=out.stdout_lines

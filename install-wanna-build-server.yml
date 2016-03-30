@@ -7,7 +7,11 @@
       copy: src=./scripts/wanna-build-source-2015-05-21.tar.gz  dest=/tmp/wanna-build-source.tar.gz
       
     - name: install sudo
-      apt: name=sudo
+      apt: name=sudo update_cache=yes
+      register: out
+
+    - name: run install script
+      script: ./scripts/install-wanna-build.sh 
       register: out
 
     - debug: var=out.stdout_lines

@@ -1,0 +1,13 @@
+---
+# tasks file for postgresql
+- name: install apt packages
+  apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+  with_items:
+    - libpq-dev
+    - postgresql
+    - python-psycopg2
+- name: create a user
+  postgresql_user:
+    name: "{{ database_user }}"
+    password: "celinux2014"
+  notify: restart postgresql

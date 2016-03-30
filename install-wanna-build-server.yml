@@ -1,12 +1,9 @@
-# test.yml
+# install-wanna-build-server.yml
 ---
-- name: install wanna build 
+- name: install wanna-build server code
   hosts: wanna-build-server-test
-  tasks:
-    - name: copy wanna-build src
-      copy: src=./scripts/wanna-build-source-2015-05-21.tar.gz  dest=/tmp/wanna-build-source.tar.gz
-      
-    - name: install apt packages
+  pre_tasks:
+    - name: install perl dependency
       apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
       register: out
       with_items:
@@ -30,13 +27,20 @@
         - dose-builddebcheck
 #        - sendmail
 
-    - name: git clone wanna-build from local repo
+    - name: get wanna-build code
       git: repo=http://10.0.2.131/cgit/wanna-build-server dest=/srv/wanna-build
       register: out    
 
     - debug: var=out.stdout_lines
 
+  roles:
+    - role: postgresql
+      database_name: "wannadb"
+      database_user: "wbadmin"
 
 #    - name: run install script
 #      script: ./scripts/install-wanna-build.sh 
 #      register: out    -
+
+#    - name: copy wanna-build src
+#      copy: src=./scripts/wanna-build-source-2015-05-21.tar.gz  dest=/tmp/wanna-build-source.tar.gz

@@ -6,12 +6,37 @@
     - name: copy wanna-build src
       copy: src=./scripts/wanna-build-source-2015-05-21.tar.gz  dest=/tmp/wanna-build-source.tar.gz
       
-    - name: install sudo
-      apt: name=sudo update_cache=yes
+    - name: install apt packages
+      apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
       register: out
+      with_items:
+        - sudo
+        - git
+#        - procmail
+        - dctrl-tools
+        - moreutils
+        - libdpkg-perl
+        - libdbi-perl
+        - libyaml-tiny-perl
+        - libhash-merge-perl
+        - libstring-format-perl
+        - libtimedate-perl
+        # for YAML::XS package
+        - libyaml-libyaml-perl
+        # for URI::Escape package
+        - liburi-perl
+        - libdbd-pg-perl
+        # edos-debcheck REMOVED; should we install "edos-distcheck" ?
+        - dose-builddebcheck
+#        - sendmail
 
-    - name: run install script
-      script: ./scripts/install-wanna-build.sh 
-      register: out
+    - name: git clone wanna-build from local repo
+      git: repo=http://10.0.2.131/cgit/wanna-build-server dest=/srv/wanna-build
+      register: out    
 
     - debug: var=out.stdout_lines
+
+
+#    - name: run install script
+#      script: ./scripts/install-wanna-build.sh 
+#      register: out    -

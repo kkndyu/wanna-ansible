@@ -2,14 +2,21 @@
 ---
 - name: install wanna-build server code
   hosts: wanna-build-server-test
+#  gather_facts: no
   pre_tasks:
+    - name: set local apt source
+      apt_repository: repo='deb http://10.0.2.129/bxbos jessie main' state=present
+    - apt_repository: repo='deb http://mirrors.163.com/debian jessie main' state=absent
+ 
     - name: install perl dependency
-      apt: pkg={{ item }} update_cache=yes cache_valid_time=3600
+      apt: >
+        pkg={{ item }} update_cache=yes cache_valid_time=3600
+        force=yes install_recommends=no state=present
       register: out
       with_items:
         - sudo
         - git
-#        - procmail
+        - procmail
         - dctrl-tools
         - moreutils
         - libdpkg-perl
@@ -25,7 +32,6 @@
         - libdbd-pg-perl
         # edos-debcheck REMOVED; should we install "edos-distcheck" ?
         - dose-builddebcheck
-#        - sendmail
 
     - name: get wanna-build code
       git: repo=http://10.0.2.131/cgit/wanna-build-server dest=/srv/wanna-build
@@ -36,7 +42,7 @@
   roles:
     - role: postgresql
       database_name: "wannadb"
-      database_user: "wbadmin"
+      database_user: "wbadm"
 
 #    - name: run install script
 #      script: ./scripts/install-wanna-build.sh 
@@ -44,3 +50,7 @@
 
 #    - name: copy wanna-build src
 #      copy: src=./scripts/wanna-build-source-2015-05-21.tar.gz  dest=/tmp/wanna-build-source.tar.gz
+
+#    - name: update ssh server
+#      apt: name=openssh-server force=yes
+#    - service: name=ssh state=restarted

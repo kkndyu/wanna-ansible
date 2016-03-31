@@ -43,6 +43,21 @@
     - role: postgresql
       database_name: "wannadb"
       database_user: "wbadm"
+      pg_service_name: "wanna-build"
+
+  post_tasks:
+    - name: ln -s /srv/wanna-build/bin/wanna-build /usr/bin/wanna-build
+      file: src=/srv/wanna-build/bin/wanna-build dest=/usr/bin/wanna-build  state=link
+
+    - name: add user
+      user: name=wbadm comment= shell=/bin/bash
+
+    - name: create folder for wbadm
+      file: path=/srv/wanna-build/tmp state=directory mode=0755 owner=wbadm
+
+
+
+#command: "ln -s /srv/wanna-build/bin/wanna-build /usr/bin/wanna-build"
 
 #    - name: run install script
 #      script: ./scripts/install-wanna-build.sh 

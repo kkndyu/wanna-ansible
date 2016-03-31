@@ -13,16 +13,51 @@
 - name: copy configuration file
   template: >
     src=pg_hba.conf.j2
-    dest=/etc/postgresql/{{ pg_version }}/main//pg_hba.conf
+    dest=/etc/postgresql/{{ pg_version }}/main/pg_hba.conf
     owner=postgres
     group=postgres
     mode=0644
   notify: restart postgresql
 
+- name: copy service file
+  template: >
+    src=pg_service.conf.j2
+    dest=/etc/postgresql-common/pg_service.conf
+    owner=postgres
+    group=postgres
+    mode=0644
+  notify: restart postgresql
+
+- name: remove database exists
+  postgresql_db:
+    name: "{{ database_name }}"
+    state: "absent"
+  sudo: True
+  sudo_user: postgres
+
+- name: remove user exists
+  postgresql_user:
+    name: "{{ database_user }}"
+    state: "absent"
+  sudo: True
+  sudo_user: postgres
+
 - name: create a user
   postgresql_user:
     name: "{{ database_user }}"
     password: "celinux2014"
+    role_attr_flags: CREATEROLE,CREATEUSER
   sudo: True
   sudo_user: postgres
-  notify: restart postgresql
+
+- name: create the database
+  postgresql_db:
+    name: "{{ database_name }}"
+    owner: "{{ database_user }}"
+    encoding: 'UTF-8'
+    template: 'template0'
+  sudo: True
+  sudo_user: postgres
+
+
+

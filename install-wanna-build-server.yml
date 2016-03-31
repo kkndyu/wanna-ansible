@@ -55,7 +55,24 @@
     - name: create folder for wbadm
       file: path=/srv/wanna-build/tmp state=directory mode=0755 owner=wbadm
 
+    - name: create tables via sql
+      shell: "psql -d wannadb -f /srv/wanna-build/schema/main-tables.sql"
+      sudo_user: postgres
+      sudo: True
 
+    - name: copy role.sql to remote
+      copy:  src=./roles.sql dest="/srv/wanna-build/schema/refine-roles.sql"
+
+    - name: create roles via sql
+      shell: "psql -d wannadb -f /srv/wanna-build/schema/refine-roles.sql"
+      sudo_user: postgres
+      sudo: True
+
+    - name: create arch-tables.sql
+      shell: ARCHES="amd64 mips64el ppc64el ppc64"; rm -f /tmp/arches-tables.sql; for arch in $ARCHES; do sed -e "s/ARCH/$arch/g" < /srv/wanna-build/schema/arches-tables.in >> /tmp/arches-tables.sql ; done
+
+#    - name: Delete sql script
+#      file: path="{{sometemplocation}}/my.sql" state=absent
 
 #command: "ln -s /srv/wanna-build/bin/wanna-build /usr/bin/wanna-build"
 

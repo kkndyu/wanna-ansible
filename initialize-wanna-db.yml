@@ -1,35 +1,83 @@
 # initialize-wanna-db.yml
 ---
-- name: create tables via sql
-  shell: "psql -d wannadb -f /srv/wanna-build/schema/main-tables.sql"
-  sudo_user: postgres
-  sudo: True
+- name: install wanna-build server code
+  hosts: wanna-build-server-test
+  gather_facts: False
+  tasks:
+    - name: create tables via sql
+      shell: "psql -d wannadb -f /srv/wanna-build/schema/main-tables.sql"
+      sudo_user: postgres
+      sudo: True
 
-- name: copy role.sql to remote
-  copy:  src=./scripts/wanna-build-refine-roles.sql dest="/srv/wanna-build/schema/refine-roles.sql"
+    - name: create roles.sql
+      shell: |
+        cat << " EOF" > /tmp/roles.sql
+          CREATE ROLE postgres;
+          ALTER ROLE postgres WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN;
+          CREATE ROLE wb-buildd;
+          ALTER ROLE wb-buildd WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN;
+          CREATE ROLE wb_all;
+          ALTER ROLE wb_all WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB NOLOGIN;
+          CREATE ROLE wb_security;
+          ALTER ROLE wb_security WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB NOLOGIN;
+          CREATE ROLE wbadm;
+          ALTER ROLE wbadm WITH NOSUPERUSER INHERIT CREATEROLE CREATEDB LOGIN;
+          GRANT wb_all TO wb-buildd GRANTED BY wbadm;
+          GRANT wb_all TO wbadm GRANTED BY wbadm;
+        EOF
+        ARCHES="amd64 mips64el ppc64el ppc64"
+        for _arch in $ARCHES ; do
+            echo "CREATE ROLE $_arch;" >>/tmp/roles.sql
+            echo "ALTER ROLE $_arch WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB NOLOGIN;" >>/tmp/roles.sql
+            echo "CREATE ROLE buildd_${_arch};" >>/tmp/roles.sql
+            echo "ALTER ROLE buildd_${_arch} WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN;" >>/tmp/roles.sql
+            echo "GRANT $_arch TO wb_all GRANTED BY wbadm;" >>/tmp/roles.sql
+            echo "GRANT wb_all TO buildd_${_arch} GRANTED BY wbadm;" >>/tmp/roles.sql
+        done
 
-- name: create roles via sql
-  shell: "psql -d wannadb -f /srv/wanna-build/schema/refine-roles.sql"
-  sudo_user: postgres
-  sudo: True
+    - name: run roles sql
+      shell: "psql -d wannadb -f /tmp/roles.sql"
+      sudo_user: postgres
+      sudo: True
 
-- name: create arch-tables.sql
-  shell: ARCHES="amd64 mips64el ppc64el ppc64"; rm -f /tmp/arches-tables.sql; for arch in $ARCHES; do sed -e "s/ARCH/$arch/g" < /srv/wanna-build/schema/arches-tables.in >> /tmp/arches-tables.sql ; done
+    - name: create arch-tables.sql
+      shell: ARCHES="amd64 mips64el ppc64el ppc64"; rm -f /tmp/arches-tables.sql; for arch in $ARCHES; do sed -e "s/ARCH/$arch/g" < /srv/wanna-build/schema/arches-tables.in >> /tmp/arches-tables.sql ; done
 
-- name: run arch-tables sql
-  shell: "psql -d wannadb -f /tmp/arches-tables.sql"
-  sudo_user: postgres
-  sudo: True
+    - name: run arch-tables sql
+      shell: "psql -d wannadb -f /tmp/arches-tables.sql"
+      sudo_user: postgres
+      sudo: True
 
-- name: insert arch and dist via sql
-  sudo_user: postgres
-  sudo: True
-  shell: |
-    psql -d wannadb  << EOF
-    INSERT INTO distributions(distribution,build_dep_resolver,archive) VALUES ('jessie','',''), ('sid','','');
-    INSERT INTO architectures(architecture) VALUES ('amd64'), ('mips64el'), ('ppc64el'), ('ppc64');
-    INSERT INTO distribution_architectures(distribution,architecture) VALUES ('jessie','amd64'), ('jessie','mips64el'), ('jessie','ppc64el'), ('jessie','ppc64');
-    INSERT INTO locks(distribution,architecture) VALUES ('jessie','amd64'), ('jessie','mips64el'), ('jessie','ppc64el'),('jessie','ppc64');
-    INSERT INTO distribution_architectures(distribution,architecture) VALUES ('sid','amd64'), ('sid','mips64el'), ('sid','ppc64el'), ('sid','ppc64');
-    INSERT INTO locks(distribution,architecture) VALUES ('sid','amd64'), ('sid','mips64el'), ('sid','ppc64el'), ('sid','ppc64');
-    EOF
+    - name: create arch and dist sql
+      shell: |
+        ARCHES="amd64 mips64el ppc64el ppc64"
+        SUITES="jessie sid jessie-updates jessie-proposed-updates"
+        : > /tmp/init-db.sql
+        for _suite in $SUITES ; do
+            echo "INSERT INTO distributions(distribution,build_dep_resolver,archive) VALUES ('$_suite','',''); " >>/tmp/init-db.sql
+        done
+        for _arch in $ARCHES ; do
+            echo "INSERT INTO architectures(architecture) VALUES ('$_arch'); " >>/tmp/init-db.sql
+            for _suite in $SUITES ; do
+                echo "INSERT INTO distribution_architectures(distribution,architecture) VALUES ('$_suite','$_arch'); " >>/tmp/init-db.sql
+                echo "INSERT INTO locks(distribution,architecture) VALUES ('$_suite','$_arch'); " >>/tmp/init-db.sql            
+            done
+        done
+
+    - name: run arch and dist sql
+      shell: "psql -d wannadb -f /tmp/init-db.sql"
+      become_user: postgres
+      become: True
+
+#    - name: insert arch and dist via sql
+#      sudo_user: postgres
+#      sudo: True
+#      shell: |
+#        psql -d wannadb  << " EOF"
+#        INSERT INTO distributions(distribution,build_dep_resolver,archive) VALUES ('jessie','',''), ('sid','','');
+#        INSERT INTO architectures(architecture) VALUES ('amd64'), ('mips64el'), ('ppc64el'), ('ppc64');
+#        INSERT INTO distribution_architectures(distribution,architecture) VALUES ('jessie','amd64'), ('jessie','mips64el'), ('jessie','ppc64el'), ('jessie','ppc64');
+#        INSERT INTO locks(distribution,architecture) VALUES ('jessie','amd64'), ('jessie','mips64el'), ('jessie','ppc64el'),('jessie','ppc64');
+#        INSERT INTO distribution_architectures(distribution,architecture) VALUES ('sid','amd64'), ('sid','mips64el'), ('sid','ppc64el'), ('sid','ppc64');
+#        INSERT INTO locks(distribution,architecture) VALUES ('sid','amd64'), ('sid','mips64el'), ('sid','ppc64el'), ('sid','ppc64');
+#        EOF

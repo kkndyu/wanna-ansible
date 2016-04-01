@@ -2,7 +2,7 @@
 ---
 - name: install wanna-build server code
   hosts: wanna-build-server-test
-#  gather_facts: no
+  gather_facts: False
   pre_tasks:
     - name: set local apt source
       apt_repository: repo='deb http://10.0.2.129/bxbos jessie main' state=present
@@ -50,8 +50,7 @@
       database_user: "wbadm"
       pg_service_name: "wanna-build"
 
-  post_tasks:
-    - include: initialize-wanna-db.yml
+- include: initialize-wanna-db.yml
 
 #    - name: insert arch and dist via sql
 #     command: psql -d wannadb -c "{{ item }}"

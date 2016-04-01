@@ -12,7 +12,6 @@
       apt: >
         pkg={{ item }} update_cache=yes cache_valid_time=3600
         force=yes install_recommends=no state=present
-      register: out
       with_items:
         - sudo
         - git
@@ -25,27 +24,15 @@
         - libhash-merge-perl
         - libstring-format-perl
         - libtimedate-perl
-        # for YAML::XS package
         - libyaml-libyaml-perl
-        # for URI::Escape package
         - liburi-perl
         - libdbd-pg-perl
-        # edos-debcheck REMOVED; should we install "edos-distcheck" ?
         - dose-builddebcheck
 
     - name: get wanna-build code
       git: repo=http://10.0.2.131/cgit/wanna-build-server dest=/srv/wanna-build
-      register: out    
+      register: out
 
-    - debug: var=out.stdout_lines
-
-  roles:
-    - role: postgresql
-      database_name: "wannadb"
-      database_user: "wbadm"
-      pg_service_name: "wanna-build"
-
-  post_tasks:
     - name: ln -s /srv/wanna-build/bin/wanna-build /usr/bin/wanna-build
       file: src=/srv/wanna-build/bin/wanna-build dest=/usr/bin/wanna-build  state=link
 
@@ -55,21 +42,23 @@
     - name: create folder for wbadm
       file: path=/srv/wanna-build/tmp state=directory mode=0755 owner=wbadm
 
-    - name: create tables via sql
-      shell: "psql -d wannadb -f /srv/wanna-build/schema/main-tables.sql"
-      sudo_user: postgres
-      sudo: True
+    - debug: var=out
 
-    - name: copy role.sql to remote
-      copy:  src=./roles.sql dest="/srv/wanna-build/schema/refine-roles.sql"
+  roles:
+    - role: postgresql
+      database_name: "wannadb"
+      database_user: "wbadm"
+      pg_service_name: "wanna-build"
 
-    - name: create roles via sql
-      shell: "psql -d wannadb -f /srv/wanna-build/schema/refine-roles.sql"
-      sudo_user: postgres
-      sudo: True
+  post_tasks:
+    - include: initialize-wanna-db.yml
 
-    - name: create arch-tables.sql
-      shell: ARCHES="amd64 mips64el ppc64el ppc64"; rm -f /tmp/arches-tables.sql; for arch in $ARCHES; do sed -e "s/ARCH/$arch/g" < /srv/wanna-build/schema/arches-tables.in >> /tmp/arches-tables.sql ; done
+#    - name: insert arch and dist via sql
+#     command: psql -d wannadb -c "{{ item }}"
+#      sudo_user: postgres
+#      sudo: True
+#      with_items:
+#        - INSERT INTO distributions(distribution,build_dep_resolver,archive) VALUES ('jessie','',''), ('sid','','');
 
 #    - name: Delete sql script
 #      file: path="{{sometemplocation}}/my.sql" state=absent

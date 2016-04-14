@@ -8,13 +8,16 @@
     SUITE: jessie
   tasks:
     - name: reset all packages of one suite to needs-build
+      # there two kind of package name+version, can't use : as FS
+      # one hamradio/xnec2c_1:3.0-1
+      # another debian-installer/debian-installer-utils_1.110:
+      # using pipe to avoid redirect I/O (MAY speed up)
       shell: |
-        sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --list=all > /tmp/package-all.list
-        awk -vFS=':' ' {split($1,parts,"/");print parts[2]}' /tmp/packages.list > /tmp/package-names-all.list
-        sed -i '/^\s*$/d' /tmp/package-names-all.list
-#        cat /tmp/package-names-all.list -print0 |  xargs -0 sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}}
-        for i in `cat /tmp/package-names-all.list`; do
-            sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --simulate-dose --override --needs-build $i
+        sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --list=bd-uninstallable |
+        awk  ' {split($1,parts,"/");if(parts[2]!="") print parts[2]}' |
+        sed  's/:$//g' |
+        while read line; do
+            sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --simulate-dose --override --needs-build $line -v
         done
       tags:
         - reset-all

@@ -1,4 +1,5 @@
 # control-wanna-server.yml
+# Usage: ansible-playbook ./control-wanna-server.yml -t reset-package-by-name,debug  --extra-vars "PACKAGE=tagainijisho_1.0.2-1"
 ---
 - name: control wanna server
   hosts: wanna-build-server-test
@@ -6,11 +7,20 @@
   vars:
     ARCH: amd64
     SUITE: jessie
+    USAGE: |
+      Usage:
+      ansible-playbook ./control-wanna-server.yml -t reset-all
+      ansible-playbook ./control-wanna-server.yml -t reset-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1'
+      ansible-playbook ./control-wanna-server.yml -t query-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1,nut_2.7.2-4'
   tasks:
+    - name: print Usage
+      debug: var=USAGE.split('\n')
+      tags: usage
+
     - name: reset all packages of one suite to needs-build
       # there two kind of package name+version, can't use : as FS
-      # one hamradio/xnec2c_1:3.0-1
-      # another debian-installer/debian-installer-utils_1.110:
+      # - hamradio/xnec2c_1:3.0-1
+      # - debian-installer/debian-installer-utils_1.110:
       # using pipe to avoid redirect I/O (MAY speed up)
       shell: |
         sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --list=bd-uninstallable |
@@ -22,4 +32,39 @@
       tags:
         - reset-all
 
+    - name: reset package state by name
+      # handle a,b,  ,a,b
+      shell: |
+        echo {{PACKAGES}} | awk -vFS=',' -vOFS='\n' '{NF=NF;print $0}' |
+        sed '/^\s*$/d' |
+        while read line; do
+            sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --simulate-dose --override --needs-build $line -v
+        done
+      register: out
+      tags:
+        - reset-by-name
+    
+    - name: query package state by name
+      shell: |
+        echo {{PACKAGES}} | awk -vFS=',' -vOFS='\n' '{NF=NF;print $0}' |
+        sed '/^\s*$/d' |
+        while read line; do
+            sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} -i $line -v
+        done
+      register: out
+      tags:
+        - query-by-name
+
+    - debug: var=out.stdout_lines
+      tags: debug
+
+    - debug: var=out
+      tags: debugall
+
+#    - debug: msg="Usage ansible-playbook ./control-wanna-server.yml -t {{ item }}"
+#      with_items:
+#        - reset-all
+#        - reset-package-by-name,debug  --extra-vars 'PACKAGE=tagainijisho_1.0.2-1'
+#      tags:
+#        - usage
 

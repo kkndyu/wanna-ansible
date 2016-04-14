@@ -9,6 +9,7 @@
     SUITE: jessie
     USAGE: |
       Usage:
+      ansible-playbook ./control-wanna-server.yml -t usage
       ansible-playbook ./control-wanna-server.yml -t reset-all
       ansible-playbook ./control-wanna-server.yml -t reset-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1'
       ansible-playbook ./control-wanna-server.yml -t query-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1,nut_2.7.2-4'
@@ -32,7 +33,7 @@
       tags:
         - reset-all
 
-    - name: reset package state by name
+    - name: reset packages state by name
       # handle a,b,  ,a,b
       shell: |
         echo {{PACKAGES}} | awk -vFS=',' -vOFS='\n' '{NF=NF;print $0}' |
@@ -44,7 +45,7 @@
       tags:
         - reset-by-name
     
-    - name: query package state by name
+    - name: query packages state by name
       shell: |
         echo {{PACKAGES}} | awk -vFS=',' -vOFS='\n' '{NF=NF;print $0}' |
         sed '/^\s*$/d' |

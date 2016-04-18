@@ -1,0 +1,17 @@
+# install-buildd.yml
+---
+- name: install buildd at compiling hosts
+  hosts: buildd1-httcloud
+  gather_facts: False
+  vars: 
+   SBUILD_JOBS: 2
+  pre_tasks:
+    - name: cleanup buildd hosts
+      script: ./scripts/cleanup-buildd-host.sh
+      register: out
+
+    - debug: var=out
+
+  roles:
+    - role: buildd
+ 

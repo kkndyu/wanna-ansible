@@ -1,0 +1,82 @@
+#
+# buildd.conf for CEC Linux box
+#
+
+$build_arch = '{{ARCH}}';
+$host_arch = '{{ARCH}}';
+
+$admin_mail = '{{ADMIN_MAIL}}';
+
+$distributions = [
+	{
+        dist_name => ["{{SUITE}}"],
+        built_architecture => "{{ARCH}}",
+		
+        wanna_build_ssh_host => "{{WANNA_HOST}}",
+        wanna_build_ssh_user => "wbadm",
+        wanna_build_db_user => "wbadm",
+		
+	# otherwise, packages will remain in $HOME/build/
+	dupload_local_queue_dir => "upload",
+		
+        logs_mailed_to => $admin_mail,
+        sbuild_chroot => '{{CHROOT_NAME}}',
+		
+	# FIXME: as required by buildd-uploader
+        sign_with => '{{BUILDD_KEY_ID}}',
+	}
+];
+
+
+$upload_queues = [
+        {
+                dupload_local_queue_dir => "upload",
+                dupload_archive_name => "httc-buildd-upload",
+        }
+];
+
+$daemon_log_file = '/var/lib/buildd/logs/daemon.log';
+
+#
+# Debug logging level
+#
+$debug = 0;
+
+#
+# verbose logging level
+#
+$verbose = 0;
+
+$no_detach = 0;
+
+$sbuild_jobs = {{SBUILD_JOBS}} ;
+
+#
+# default to 2; for sid, use a bigger number
+#
+# "The daemon is going to sleep for 1 hour, or can be restarted with SIGUSR2"
+#
+$max_sbuild_fails = 20;
+
+$idle_sleep_time = 300;
+
+$log_queued_messages = 1;
+
+$apt_get = 'apt-get';
+$mailprog = '/usr/sbin/sendmail';
+$ssh = 'ssh';
+$sudo = 'sudo';
+
+$statistics_mail = $admin_mail;
+
+$wanna_build_built_architecture = '{{ARCH}}';
+
+$wanna_build_db_user = 'wbadm';
+$wanna_build_ssh_host = '{{WANNA_HOST}}';
+
+$wanna_build_ssh_socket = '/var/buildd.sock';
+$wanna_build_ssh_user = 'wbadm';
+
+1;
+
+

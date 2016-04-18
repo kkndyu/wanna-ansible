@@ -1,0 +1,34 @@
+---
+# tasks file for buildd
+- name: install apt packages
+  apt: >
+    pkg={{ item }} update_cache=yes cache_valid_time=3600
+    force=yes install_recommends=no state=present
+  with_items:
+    - buildd
+
+- name: disable buildd daemon during install
+  file: path=/var/lib/buildd/NO-DAEMON-PLEASE state=touch mode=0644
+
+- name: import keys
+  shell: |
+    buildd gpg --import $_dir/buildd_key_pub.gpg
+    buildd gpg --import $_dir/buildd_key_sec.gpg
+  become: True
+  become_user: buildd
+#
+# TODO
+# Set SBUILD_JOBS
+# Run `cat /proc/cpuinfo | grep "processor" | wc -l` in host
+# Get the result, then set the value here
+# How do this in ansible?
+#
+- name: buildd config file
+  template: >
+    src=template-buildd.conf.j2
+    dest=/etc/buildd/buildd.conf
+    mode=0644
+#  notify: restart buildd
+
+
+  

@@ -13,7 +13,7 @@
       wannaplay reset-all
       ansible-playbook ./control-wanna-server.yml -t usage
       ansible-playbook ./control-wanna-server.yml -t reset-all
-      ansible-playbook ./control-wanna-server.yml -t reset-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1'
+      ansible-playbook ./control-wanna-server.yml -t reset-by-name,debug  -e 'PACKAGES=tagainijisho_1.0.2-1'
       ansible-playbook ./control-wanna-server.yml -t query-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1,nut_2.7.2-4'
       ansible-playbook ./control-wanna-server.yml -t reset-by-list,debug  --extra-vars 'PLIST=X11.list'
   tasks:

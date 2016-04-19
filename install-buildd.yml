@@ -3,12 +3,11 @@
 - name: install buildd at compiling hosts
   hosts: buildd1-httcloud
   gather_facts: False
-  vars: 
-   SBUILD_JOBS: 2
   pre_tasks:
     - name: cleanup buildd hosts
       script: ./scripts/cleanup-buildd-host.sh
       register: out
+      ignore_errors: True
 
     - debug: var=out
 

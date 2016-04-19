@@ -16,13 +16,31 @@
     buildd gpg --import $_dir/buildd_key_sec.gpg
   become: True
   become_user: buildd
+  ignore_errors: True
 #
 # TODO
-# Set SBUILD_JOBS
+# Set SBUILD_JOBS needed in buildd.conf
 # Run `cat /proc/cpuinfo | grep "processor" | wc -l` in host
 # Get the result, then set the value here
 # How do this in ansible?
 #
+# 1. custom module return dict {ansible_facts:{SBUILD_JOBS:}}
+# 2. register shell output then call set_fact
+#
+# Here choosing the FIRST one
+#
+- name: get facts by module
+  get_cpuinfo:
+
+#- name: get cpu number
+#  shell: |
+#    cat /proc/cpuinfo | grep "processor" | wc -l
+#  register: cpu_number
+#  tags: set_fact_cpu_number
+#
+#- set_fact: SBUILD_JOBS={{cpu_number.stdout}}
+#  tags: set_fact_cpu_number
+
 - name: buildd config file
   template: >
     src=template-buildd.conf.j2

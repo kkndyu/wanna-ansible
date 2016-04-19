@@ -10,13 +10,29 @@
 - name: disable buildd daemon during install
   file: path=/var/lib/buildd/NO-DAEMON-PLEASE state=touch mode=0644
 
-- name: import keys
+# What if there are illegal characters in localfile?
+#- name: import keys
+#  shell: |
+#    echo "{{lookup('file','../files/buildd_key_pub.gpg.back')}}" |
+#    gpg --import
+#    echo "{{lookup('file','../files/buildd_key_sec.gpg')}}" |
+#    gpg --import
+
+- name: copy key before import keys 
+  copy: src=../files/buildd_key_pub.gpg dest=/tmp/ owner=buildd
+
+- name: copy key before import keys 
+  copy: src=../files/buildd_key_sec.gpg dest=/tmp/ owner=buildd
+
+- name: import keys 
   shell: |
-    buildd gpg --import $_dir/buildd_key_pub.gpg
-    buildd gpg --import $_dir/buildd_key_sec.gpg
+    gpg --import /tmp/buildd_key_pub.gpg
+    gpg --import /tmp/buildd_key_sec.gpg
   become: True
   become_user: buildd
   ignore_errors: True
+  register: out
+
 #
 # TODO
 # Set SBUILD_JOBS needed in buildd.conf
@@ -48,5 +64,7 @@
     mode=0644
 #  notify: restart buildd
 
+- debug: var=out
+  tags: debug
 
   

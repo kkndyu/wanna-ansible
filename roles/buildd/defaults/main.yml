@@ -23,7 +23,7 @@ WANNA_HOST: 10.0.2.107
 #
 # Dak host
 #
-REPREPRO_HOST: 192.168.133.223
+REPREPRO_HOST: 10.0.2.129
 
 #
 # buildd repo

@@ -26,8 +26,8 @@
 
 - name: import keys 
   shell: |
-    gpg --import /tmp/buildd_key_pub.gpg
-    gpg --import /tmp/buildd_key_sec.gpg
+    gpg --import /tmp/buildd_key_pub.gpg 2>&1
+    gpg --import /tmp/buildd_key_sec.gpg 2>&1
   become: True
   become_user: buildd
   ignore_errors: True
@@ -63,6 +63,12 @@
     dest=/etc/buildd/buildd.conf
     mode=0644
 #  notify: restart buildd
+
+- name: dupload config file
+  template: >
+    src=dupload.conf.j2
+    dest=/etc/dupload.conf
+    mode=0644
 
 - debug: var=out
   tags: debug

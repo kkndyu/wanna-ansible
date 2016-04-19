@@ -1,0 +1,12 @@
+package config;
+
+$cfg{'httc-buildd-upload'} = {
+        fqdn    =>'{{REPREPRO_HOST}}',
+        login   =>'buildd',
+        method  =>'scpb',
+        incoming=>'/Incoming_buildd',
+        dinstall_runs => 1
+};
+
+# Don't remove the following line.  Perl needs it.
+1;

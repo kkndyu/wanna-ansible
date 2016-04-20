@@ -1,0 +1,46 @@
+---
+# buildd copy keys
+
+# What if there are illegal characters in localfile?
+#- name: import keys
+#  shell: |
+#    echo "{{lookup('file','../files/buildd_key_pub.gpg.back')}}" |
+#    gpg --import
+#    echo "{{lookup('file','../files/buildd_key_sec.gpg')}}" |
+#    gpg --import
+
+- name: copy key before import keys 
+  copy: src=../files/buildd_key_pub.gpg dest=/tmp/ owner=buildd
+
+- name: copy key before import keys 
+  copy: src=../files/buildd_key_sec.gpg dest=/tmp/ owner=buildd
+
+- name: import keys 
+  shell: |
+    gpg --import /tmp/buildd_key_pub.gpg 2>&1
+    gpg --import /tmp/buildd_key_sec.gpg 2>&1
+  become: True
+  become_user: buildd
+  ignore_errors: True
+  register: out
+
+# copy form script, what for?
+- name: copy private key
+  copy: >
+    src=../files/buildd_user_id_rsa
+    dest=~buildd/.ssh/id_rsa
+    owner=buildd mode=0600
+
+- name: copy pub key
+  copy: >
+    src=../files/buildd_user_id_rsa.pub 
+    dest=~buildd/.ssh/id_rsa.pub
+    owner=buildd
+
+- name: copy pub-cert key
+  copy: >
+    src=../files/buildd_user_id_rsa-cert.pub 
+    dest=~buildd/.ssh/id_rsa-cert.pub
+    owner=buildd
+
+

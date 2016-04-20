@@ -5,34 +5,15 @@
     pkg={{ item }} update_cache=yes cache_valid_time=3600
     force=yes install_recommends=no state=present
   with_items:
+    - sbuild
     - buildd
+    - sudo
+    - schroot
 
 - name: disable buildd daemon during install
   file: path=/var/lib/buildd/NO-DAEMON-PLEASE state=touch mode=0644
 
-# What if there are illegal characters in localfile?
-#- name: import keys
-#  shell: |
-#    echo "{{lookup('file','../files/buildd_key_pub.gpg.back')}}" |
-#    gpg --import
-#    echo "{{lookup('file','../files/buildd_key_sec.gpg')}}" |
-#    gpg --import
-
-- name: copy key before import keys 
-  copy: src=../files/buildd_key_pub.gpg dest=/tmp/ owner=buildd
-
-- name: copy key before import keys 
-  copy: src=../files/buildd_key_sec.gpg dest=/tmp/ owner=buildd
-
-- name: import keys 
-  shell: |
-    gpg --import /tmp/buildd_key_pub.gpg 2>&1
-    gpg --import /tmp/buildd_key_sec.gpg 2>&1
-  become: True
-  become_user: buildd
-  ignore_errors: True
-  register: out
-
+- include: import-keys.yml
 #
 # TODO
 # Set SBUILD_JOBS needed in buildd.conf
@@ -69,6 +50,9 @@
     src=dupload.conf.j2
     dest=/etc/dupload.conf
     mode=0644
+
+- name: sbuild add buildd to sbuild group
+  shell: sbuild-adduser buildd
 
 - debug: var=out
   tags: debug

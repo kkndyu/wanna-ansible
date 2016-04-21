@@ -16,10 +16,10 @@ $distributions = [
         wanna_build_ssh_user => "wbadm",
         wanna_build_db_user => "wbadm",
 		
-	# otherwise, packages will remain in $HOME/build/
-	dupload_local_queue_dir => "upload",
+	    # otherwise, packages will remain in $HOME/build/
+	    dupload_local_queue_dir => "upload",
 		
-        logs_mailed_to => $admin_mail,
+        logs_mailed_to => {{admin_mail}},
         sbuild_chroot => '{{CHROOT_NAME}}',
 		
 	# FIXME: as required by buildd-uploader
@@ -49,7 +49,8 @@ $verbose = 0;
 
 $no_detach = 0;
 
-$sbuild_jobs = {{SBUILD_JOBS}} ;
+#$sbuild_jobs = {{SBUILD_JOBS}} ;
+$ENV{'DEB_BUILD_OPTIONS'} = 'parallel={{SBUILD_JOBS}}';
 
 #
 # default to 2; for sid, use a bigger number

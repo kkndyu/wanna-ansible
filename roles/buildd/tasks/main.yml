@@ -51,10 +51,47 @@
     dest=/etc/dupload.conf
     mode=0644
 
+- name: sbuild config file
+  template: >
+    src=sbuild.conf.j2
+    dest=/etc/sbuild/sbuild.conf
+    mode=0644
+
 - name: sbuild add buildd to sbuild group
   shell: sbuild-adduser buildd
+
+- name: create buildd dir
+  shell: |
+    mkdir -p /data/buildd_topdir
+    test -L /buildd && rm /buildd ; ln -s /data/buildd_topdir /buildd
+#
+# TODO   create chroot image
+#
+
+- name: install buildd chroot
+  shell: |
+    test -d "/var/lib/schroot/unpack" && rm -fr /var/lib/schroot/unpack
+    test -L "/var/lib/schroot/unpack" && rm /var/lib/schroot/unpack
+    mkdir -p /buildd/schroot_unpack
+    ln -s `readlink -f /buildd/schroot_unpack` /var/lib/schroot/unpack
+    test -d "/var/lib/schroot/mount" && rm -fr /var/lib/schroot/mount
+    test -L "/var/lib/schroot/mount" && rm /var/lib/schroot/mount
+    mkdir -p /buildd/schroot_mount
+    ln -s `readlink -f /buildd/schroot_mount` /var/lib/schroot/mount
+    rm -f /etc/schroot/chroot.d/${CHROOT_NAME}*
+    wget -O /buildd/{{BUILDD_CHROOT_IMAGE_FILE}} {{CHROOT_IMAGE_URL}}
+
+- name: schroot config file
+  template: >
+    src=schroot.conf.j2
+    dest=/etc/schroot/chroot.d/{{CHROOT_NAME}}
+    mode=0644
+
+#
+# TODO  Copy user key to wanna-server for SSH
+#
 
 - debug: var=out
   tags: debug
 
-  
+

@@ -1,0 +1,17 @@
+[{{CHROOT_NAME}}]
+type=file
+
+description=httc-buildd chroot image
+
+users=root,sbuild,buildd
+root-users=root,sbuild,buildd
+
+groups=root,sbuild,buildd
+root-groups=root,sbuild,buildd
+
+file=/buildd/{{BUILDD_CHROOT_IMAGE_FILE}}
+
+#
+# use the pre-defined profile, rather than a customized one
+#
+profile=buildd

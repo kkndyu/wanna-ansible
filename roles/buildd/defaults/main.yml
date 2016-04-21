@@ -28,7 +28,7 @@ REPREPRO_HOST: 10.0.2.129
 #
 # buildd repo
 #
-BUILDD_REPO_URL: http://192.168.133.223/buildd/debian
+BUILDD_REPO_URL:
 
 #
 # vm_dak_amd64
@@ -42,4 +42,4 @@ MIRROR_SOURCE:
 
 BUILDD_CHROOT_IMAGE_FILE: httc-buildd-chroot.tar.gz
 
-CHROOT_IMAGE_URL:
+CHROOT_IMAGE_URL: http://10.0.2.129/download/{{BUILDD_CHROOT_IMAGE_FILE}}

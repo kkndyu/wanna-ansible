@@ -43,4 +43,16 @@
     dest=~buildd/.ssh/id_rsa-cert.pub
     owner=buildd
 
+- name: copy OpenSSH CA certitifate
+  copy: src=../files/baixibao-linux-CA-key.pub dest=/tmp/
 
+- name: install CA
+  shell: |
+    ( echo -n '@cert-authority * ' ; cat /tmp/baixibao-linux-CA-key.pub ) > /etc/ssh/ssh_known_hosts
+    rm -f ~buildd/.ssh/known_hosts
+
+- name: sbuild keys
+  copy: src=../files/sbuild-key.pub dest=/var/lib/sbuild/apt-keys/ owner=sbuild
+
+- name: sbuild sec keys
+  copy: src=../files/sbuild-key.sec dest=/var/lib/sbuild/apt-keys/ owner=sbuild

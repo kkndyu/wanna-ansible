@@ -1,7 +1,7 @@
 # install-buildd.yml
 ---
 - name: install buildd at compiling hosts
-  hosts: buildd2-httcloud,buildd3-httcloud
+  hosts: buildd5-httcloud
   gather_facts: True
   pre_tasks:
     - name: cleanup buildd hosts

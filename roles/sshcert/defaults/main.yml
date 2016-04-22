@@ -1,0 +1,27 @@
+---
+# defaults file for sshcert
+
+#
+# the name of CA public key
+#
+CA_PUB: baixibao-linux-CA-key.pub
+
+#
+# the name of CA private key
+#
+CA_PRIVATE: baixibao-linux-CA-key
+
+#
+# conditions: server or client
+#
+TYPE:
+
+#
+# User key name
+#
+USER_KEY_NAME: buildd_user_id_rsa
+
+#
+# user key destination
+#
+USER_HOME: /root

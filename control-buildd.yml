@@ -6,10 +6,9 @@
   vars:
     USAGE: |
       Usage:
-      wannaplay reset-all
       ansible-playbook ./control-buildd.yml -t usage
       ansible-playbook ./control-buildd.yml -t enable-buildd,debug
-      ansible-playbook ./control-buildd.yml -t disable-buildd  -e 'PACKAGES=tagainijisho_1.0.2-1'
+      ansible-playbook ./control-buildd.yml -t disable-buildd  -e ''
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')
@@ -17,11 +16,23 @@
 
     - name: enable-buildd
       shell: |
+        rm -f ~buildd/EXIT-DAEMON-PLEASE
         rm -f ~buildd/NO-DAEMON-PLEASE
         kill -HUP `cat /var/run/crond.pid`
+        sudo -u buildd buildd-watch
       register: out
       tags:
         - enable-buildd
+
+    - name: disable-buildd
+      shell: |
+        touch ~buildd/EXIT-DAEMON-PLEASE
+        touch ~buildd/NO-DAEMON-PLEASE
+      become: Ture
+      become_user: buildd
+      register: out
+      tags:
+        - disable-buildd
 
     - debug: var=out.stdout_lines
       tags: debug

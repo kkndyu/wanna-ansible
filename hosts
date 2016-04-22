@@ -7,3 +7,6 @@ wanna-build-server-test ansible_ssh_host=10.0.2.107 ansible_ssh_port=22 ansible_
 buildd1-httcloud ansible_ssh_host=10.0.2.137  ansible_ssh_pass=httc
 buildd2-httcloud ansible_ssh_host=10.0.2.138  ansible_ssh_pass=httc
 buildd3-httcloud ansible_ssh_host=10.0.2.140  ansible_ssh_pass=httc
+buildd4-httcloud ansible_ssh_host=10.0.2.114  ansible_ssh_pass=httc
+buildd5-httcloud ansible_ssh_host=10.0.2.126  ansible_ssh_pass=httc
+buildd6-httcloud ansible_ssh_host=10.0.2.127  ansible_ssh_pass=httc

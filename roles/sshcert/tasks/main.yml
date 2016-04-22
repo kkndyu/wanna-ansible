@@ -1,0 +1,83 @@
+---
+# tasks file for sshcert
+
+#
+#  TODO the ssh cert should be a role
+#
+
+- name: copy CA pub
+  copy: >
+    src=../files/{{CA_PUB}}
+    dest=/etc/ssh/{{CA_PUB}}
+  when: TYPE == "server"
+  tags: ssh-by-CA
+
+- name: add to TrustedUserCAKeys
+  shell: |
+    if ! grep -e "TrustedUserCAKeys" /etc/ssh/sshd_config ; then
+        echo "TrustedUserCAKeys /etc/ssh/{{CA_PUB}}" >> /etc/ssh/sshd_config
+        kill -HUP `cat /run/sshd.pid`
+    fi
+  when: TYPE == "server"
+  tags: ssh-by-CA
+
+- name: copy CA private
+  copy: >
+    src=./roles/buildd/files/{{CA_PRIVATE}}
+    dest=/tmp/{{CA_PRIVATE}}
+    mode=0600
+  when: TYPE == "server"
+  tags: ssh-by-CA
+
+- name: sign host key & add to HostCertificate
+  shell: |
+    ssh-keygen -h -s /tmp/{{CA_PRIVATE}} \
+               -P baixibao2015 \
+               -I "%{{ansible_hostname}}%" \
+               -V +52w1d \
+               -n "{{ansible_hostname}},{{ansible_eth0.ipv4.address}},{{ansible_ssh_host}}" \
+               /etc/ssh/ssh_host_rsa_key.pub
+    if ! grep -e HostCertificate /etc/ssh/sshd_config ; then
+        echo "HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub" >> /etc/ssh/sshd_config
+        kill -HUP `cat /run/sshd.pid`
+    fi
+  register: out
+  when: TYPE == "server"
+  tags: ssh-by-CA
+
+# copy form script, what for?
+- name: mkdir user .ssh
+  file: path={{USER_HOME}}/.ssh state=directory
+
+- name: copy user private key
+  copy: >
+    src=../files/{{USER_KEY_NAME}}
+    dest={{USER_HOME}}/.ssh/id_rsa
+    mode=0644
+  when: TYPE == "client"
+
+- name: copy user pub key
+  copy: >
+    src=../files/{{USER_KEY_NAME}}.pub 
+    dest={{USER_HOME}}/.ssh/id_rsa.pub
+    mode=0644
+  when: TYPE == "client"
+
+- name: copy user pub-cert key
+  copy: >
+    src=../files/{{USER_KEY_NAME}}-cert.pub 
+    dest={{USER_HOME}}/.ssh/id_rsa-cert.pub
+    mode=0644
+  when: TYPE == "client"
+
+- name: copy CA certitifate
+  copy: src=../files/{{CA_PUB}} dest=/tmp/
+  when: TYPE == "client"
+
+- name: install CA
+  shell: |
+    ( echo -n '@cert-authority * ' ; cat /tmp/{{CA_PUB}} ) > /etc/ssh/ssh_known_hosts
+    rm -f ~buildd/.ssh/known_hosts
+  when: TYPE == "client"
+
+

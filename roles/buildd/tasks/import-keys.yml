@@ -24,33 +24,6 @@
   ignore_errors: True
   register: out
 
-# copy form script, what for?
-- name: copy private key
-  copy: >
-    src=../files/buildd_user_id_rsa
-    dest=~buildd/.ssh/id_rsa
-    owner=buildd mode=0600
-
-- name: copy pub key
-  copy: >
-    src=../files/buildd_user_id_rsa.pub 
-    dest=~buildd/.ssh/id_rsa.pub
-    owner=buildd
-
-- name: copy pub-cert key
-  copy: >
-    src=../files/buildd_user_id_rsa-cert.pub 
-    dest=~buildd/.ssh/id_rsa-cert.pub
-    owner=buildd
-
-- name: copy OpenSSH CA certitifate
-  copy: src=../files/baixibao-linux-CA-key.pub dest=/tmp/
-
-- name: install CA
-  shell: |
-    ( echo -n '@cert-authority * ' ; cat /tmp/baixibao-linux-CA-key.pub ) > /etc/ssh/ssh_known_hosts
-    rm -f ~buildd/.ssh/known_hosts
-
 - name: sbuild keys
   copy: src=../files/sbuild-key.pub dest=/var/lib/sbuild/apt-keys/ owner=sbuild
 

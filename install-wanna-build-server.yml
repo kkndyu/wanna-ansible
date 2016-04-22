@@ -2,7 +2,7 @@
 ---
 - name: install wanna-build server code
   hosts: wanna-build-server-test
-  gather_facts: False
+  gather_facts: TRUE
   pre_tasks:
     - name: set local apt source
       apt_repository: repo='deb http://10.0.2.129/bxbos jessie main' state=present
@@ -42,8 +42,47 @@
     - name: create folder for wbadm
       file: path=/srv/wanna-build/tmp state=directory mode=0755 owner=wbadm
     - file: path=/srv/buildd.debian.org state=directory mode=0755 owner=wbadm
+#
+#  TODO the ssh cert should be a role
+#
+    - name: copy CA pub
+      copy: >
+        src=./roles/buildd/files/baixibao-linux-CA-key.pub
+        dest=/etc/ssh/baixibao-linux-CA-key.pub
+      tags: ssh-by-CA
+
+    - name: add to TrustedUserCAKeys
+      shell: |
+        if ! grep -e "TrustedUserCAKeys" /etc/ssh/sshd_config ; then
+            echo "TrustedUserCAKeys /etc/ssh/baixibao-linux-CA-key.pub" >> /etc/ssh/sshd_config
+            kill -HUP `cat /run/sshd.pid`
+        fi
+      tags: ssh-by-CA
+
+    - name: copy CA private
+      copy: >
+        src=./roles/buildd/files/baixibao-linux-CA-key
+        dest=/tmp/baixibao-linux-CA-key
+        mode=0600
+      tags: ssh-by-CA
+
+    - name: sign host key & add to HostCertificate
+      shell: |
+        ssh-keygen -h -s /tmp/baixibao-linux-CA-key \
+                   -P baixibao2015 \
+                   -I "%{{ansible_hostname}}%" \
+                   -V +52w1d \
+                   -n "{{ansible_hostname}},{{ansible_eth0.ipv4.address}},{{ansible_ssh_host}}" \
+                   /etc/ssh/ssh_host_rsa_key.pub
+        if ! grep -e HostCertificate /etc/ssh/sshd_config ; then
+            echo "HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub" >> /etc/ssh/sshd_config
+            kill -HUP `cat /run/sshd.pid`
+        fi
+      register: out
+      tags: ssh-by-CA
 
     - debug: var=out
+      tags: debug
 
   roles:
     - role: postgresql

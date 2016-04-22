@@ -23,7 +23,7 @@
 #
 # 1. custom module return dict {ansible_facts:{SBUILD_JOBS:}}
 # 2. register shell output then call set_fact
-#
+# 3. a ansible facts named ansible_processor_count
 # Here choosing the FIRST one
 #
 - name: get facts by module
@@ -89,6 +89,8 @@
 
 #
 # TODO  Copy user key to wanna-server for SSH
+# echo StrictHostKeyChecking no >> ~/.ssh/config
+# no need now, using CA ssh auth
 #
 
 - debug: var=out

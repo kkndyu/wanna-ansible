@@ -1,3 +1,4 @@
+=====================================================
 Let the CA code to be a role
 wanna-server and buildd roles will depend on it
 using vars to classify the server and client
@@ -12,5 +13,10 @@ sign it
 copy to remote
 - ansible seems has no way to execute shell locally
 (seems local_action can do this)
+
+done
+======================================================
+
+change wanna-server code  to be a role
 
 ======================================================

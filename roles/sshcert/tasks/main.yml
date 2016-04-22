@@ -81,4 +81,5 @@
     rm -f {{USER_HOME}}/.ssh/known_hosts
   when: TYPE == "client"
 
+#- include: fetch-sign-copy.yml
 

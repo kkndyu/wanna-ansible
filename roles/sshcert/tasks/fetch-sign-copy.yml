@@ -1,0 +1,55 @@
+---
+# fetch and sign and copy
+
+#
+# For security reason
+# Other than copy CA private key to remote
+# Fetch host key 
+# Sign it with CA
+# Copy host-key-cert to remote
+#
+
+- name: fetch host rsa key
+  fetch: >
+    src=/etc/ssh/ssh_host_rsa_key.pub
+    dest=/tmp/fetched/{{inventory_hostname}}/
+    flat=yes
+  when: TYPE == "server"
+  tags: fetch-sign-copy
+
+#
+# Relative path change when using delegate_to
+# MAYBE code copy to localhost?
+# 
+#ssh-keygen -h -s  {{ playbook_dir }}/roles/sshcert/files/{{CA_PRIVATE}} \
+- name: sign host key & add to HostCertificate
+  shell: |
+    ssh-keygen -h -s  {{ playbook_dir }}/roles/sshcert/files/{{CA_PRIVATE}} \
+               -P baixibao2015 \
+               -I "%{{ansible_hostname}}%" \
+               -V +52w1d \
+               -n "{{ansible_hostname}},{{ansible_ssh_host}}" \
+               /tmp/fetched/{{inventory_hostname}}/ssh_host_rsa_key.pub
+  register: out
+  delegate_to: 127.0.0.1
+  when: TYPE == "server"
+  tags: fetch-sign-copy
+
+- debug: var=out
+  tags: fetch-sign-copy
+
+- name: copy host-key-cert
+  copy: >
+    src=/tmp/fetched/{{ansible_hostname}}/ssh_host_rsa_key-cert.pub
+    dest=/etc/ssh/ssh_host_rsa_key-cert.pub
+  when: TYPE == "server"
+#  tags: fetch-sign-copy
+
+- name: add to sshd_config
+  shell: |
+    if ! grep -e HostCertificate /etc/ssh/sshd_config ; then
+        echo "HostCertificate /etc/ssh/ssh_host_rsa_key-cert.pub" >> /etc/ssh/sshd_config
+        kill -HUP `cat /run/sshd.pid`
+    fi
+  when: TYPE == "server"
+#  tags: fetch-sign-copy

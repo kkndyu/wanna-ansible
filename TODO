@@ -1,3 +1,11 @@
 Let the CA code to be a role
 wanna-server and buildd roles will depend on it
 using vars to classify the server and client
+
+
+CA private keys should not copy to host
+The right way is:
+fetch host key
+sign it
+copy to remote
+- ansible seems has no way to execute shell locally

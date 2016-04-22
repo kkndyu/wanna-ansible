@@ -1,12 +1,12 @@
 # control-buildd.yml
 ---
 - name: control wanna server
-  hosts: buildd2-httcloud,buildd3-httcloud
+  hosts: buildd
   gather_facts: False
   vars:
     USAGE: |
       Usage:
-      ansible-playbook ./control-buildd.yml -t usage
+      ansible-playbook ./control-buildd.yml [-l some hosts] -t usage
       ansible-playbook ./control-buildd.yml -t enable-buildd,debug
       ansible-playbook ./control-buildd.yml -t disable-buildd  -e ''
   tasks:
@@ -19,7 +19,7 @@
         rm -f ~buildd/EXIT-DAEMON-PLEASE
         rm -f ~buildd/NO-DAEMON-PLEASE
         kill -HUP `cat /var/run/crond.pid`
-        sudo -u buildd buildd-watch
+        sudo -u buildd buildd-watcher
       register: out
       tags:
         - enable-buildd

@@ -9,6 +9,19 @@
 #    echo "{{lookup('file','../files/buildd_key_sec.gpg')}}" |
 #    gpg --import
 
+#
+# Copy user key to wanna-server for SSH
+# echo StrictHostKeyChecking no >> ~/.ssh/config
+# NO need now, using CA ssh auth
+#
+
+#
+# change mode of private key to 0600
+# or there will be a error by ssh
+#
+- name: chmod user private key to 0600
+  file: path=~buildd/.ssh/id_rsa owner=buildd mode=0600
+
 - name: copy key before import keys 
   copy: src=../files/buildd_key_pub.gpg dest=/tmp/ owner=buildd
 

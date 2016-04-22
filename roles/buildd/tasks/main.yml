@@ -60,10 +60,10 @@
 - name: sbuild add buildd to sbuild group
   shell: sbuild-adduser buildd
 
-- name: create buildd dir
+- name: create buildd workspace
   shell: |
-    mkdir -p /data/buildd_topdir
-    test -L /buildd && rm /buildd ; ln -s /data/buildd_topdir /buildd
+    mkdir -p {{BUILDD_WORKSPACE}}
+    test -L /buildd && rm /buildd ; ln -s {{BUILDD_WORKSPACE}} /buildd
 #
 # TODO   create chroot image
 #
@@ -86,12 +86,6 @@
     src=schroot.conf.j2
     dest=/etc/schroot/chroot.d/{{CHROOT_NAME}}
     mode=0644
-
-#
-# TODO  Copy user key to wanna-server for SSH
-# echo StrictHostKeyChecking no >> ~/.ssh/config
-# no need now, using CA ssh auth
-#
 
 - debug: var=out
   tags: debug

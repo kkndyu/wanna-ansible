@@ -19,7 +19,7 @@ $distributions = [
         # otherwise, packages will remain in $HOME/build/
         dupload_local_queue_dir => "upload",
 		
-        logs_mailed_to => {{admin_mail}},
+        logs_mailed_to => '{{ADMIN_MAIL}}',
         sbuild_chroot => '{{CHROOT_NAME}}',
 		
 	# FIXME: as required by buildd-uploader

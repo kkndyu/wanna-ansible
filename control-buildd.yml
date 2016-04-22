@@ -1,14 +1,14 @@
 # control-buildd.yml
 ---
 - name: control wanna server
-  hosts: buildd1-httcloud
+  hosts: buildd2-httcloud,buildd3-httcloud
   gather_facts: False
   vars:
     USAGE: |
       Usage:
       wannaplay reset-all
       ansible-playbook ./control-buildd.yml -t usage
-      ansible-playbook ./control-buildd.yml -t enable-buildd
+      ansible-playbook ./control-buildd.yml -t enable-buildd,debug
       ansible-playbook ./control-buildd.yml -t disable-buildd  -e 'PACKAGES=tagainijisho_1.0.2-1'
   tasks:
     - name: print Usage

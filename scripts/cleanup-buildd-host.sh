@@ -9,9 +9,11 @@ set -e
 
 OUTPUT=`ps -ef`
 
-if echo "$OUTPUT" | grep -q -e buildd >/dev/null ; then
+if ! echo "$OUTPUT" | grep  buildd | grep -v grep > /dev/null ; then
 	echo "buildd is still running ... exit"
 	# exit 1
+    pid=$(ps aux | grep buildd | grep -v grep | awk '{print $2}')
+    kill $pid
 fi
 
 echo " -----------------------------------------"

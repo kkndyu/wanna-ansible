@@ -23,7 +23,7 @@
 
 - name: copy CA private
   copy: >
-    src=./roles/buildd/files/{{CA_PRIVATE}}
+    src=../files/{{CA_PRIVATE}}
     dest=/tmp/{{CA_PRIVATE}}
     mode=0600
   when: TYPE == "server"
@@ -48,6 +48,7 @@
 # copy form script, what for?
 - name: mkdir user .ssh
   file: path={{USER_HOME}}/.ssh state=directory
+  when: TYPE == "client"
 
 - name: copy user private key
   copy: >
@@ -77,7 +78,7 @@
 - name: install CA
   shell: |
     ( echo -n '@cert-authority * ' ; cat /tmp/{{CA_PUB}} ) > /etc/ssh/ssh_known_hosts
-    rm -f ~buildd/.ssh/known_hosts
+    rm -f {{USER_HOME}}/.ssh/known_hosts
   when: TYPE == "client"
 
 

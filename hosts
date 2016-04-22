@@ -1,9 +1,9 @@
 [wanna-server]
-server-24core ansible_ssh_host=192.168.133.6 ansible_ssh_user=root
 wanna-build-server  ansible_ssh_host=10.0.2.139 ansible_ssh_port=22
 wanna-build-server-test ansible_ssh_host=10.0.2.107 ansible_ssh_port=22 ansible_ssh_pass=httc
 
 [buildd]
+server-24core ansible_ssh_host=192.168.133.6  ansible_ssh_pass=httc123
 buildd1-httcloud ansible_ssh_host=10.0.2.137  ansible_ssh_pass=httc
 buildd2-httcloud ansible_ssh_host=10.0.2.138  ansible_ssh_pass=httc
 buildd3-httcloud ansible_ssh_host=10.0.2.140  ansible_ssh_pass=httc

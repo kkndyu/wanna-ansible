@@ -42,11 +42,5 @@
 - debug: var=out
   tags: debug
 
-  roles:
-- role: sshcert
-  TYPE: "server"
-
-- role: postgresql
-  database_name: "wannadb"
-  database_user: "wbadm"
-  pg_service_name: "wanna-build"
+- include: initialize-wanna-db.yml
+- include: import-packages-to-wanna-db.yml

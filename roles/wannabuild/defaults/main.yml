@@ -1,0 +1,8 @@
+---
+# defaults file for wannabuild
+
+database_name: "wannadb"
+
+database_user: "wbadm"
+
+pg_service_name: "wanna-build"

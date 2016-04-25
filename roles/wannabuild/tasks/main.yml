@@ -1,0 +1,52 @@
+---
+# tasks file for wannabuild
+- name: set local apt source
+  apt_repository: repo='deb http://10.0.2.129/bxbos jessie main' state=present
+- apt_repository: repo='deb http://mirrors.163.com/debian jessie main' state=absent
+ 
+- name: install perl dependency
+  apt: >
+    pkg={{ item }} update_cache=yes cache_valid_time=3600
+    force=yes install_recommends=no state=present
+  with_items:
+    - sudo
+    - git
+    - procmail
+    - dctrl-tools
+    - moreutils
+    - libdpkg-perl
+    - libdbi-perl
+    - libyaml-tiny-perl
+    - libhash-merge-perl
+    - libstring-format-perl
+    - libtimedate-perl
+    - libyaml-libyaml-perl
+    - liburi-perl
+    - libdbd-pg-perl
+    - dose-builddebcheck
+
+- name: get wanna-build code
+  git: repo=http://10.0.2.131/cgit/wanna-build-server dest=/srv/wanna-build
+  register: out
+
+- name: ln -s /srv/wanna-build/bin/wanna-build /usr/bin/wanna-build
+  file: src=/srv/wanna-build/bin/wanna-build dest=/usr/bin/wanna-build  state=link
+
+- name: add user
+  user: name=wbadm comment= shell=/bin/bash
+
+- name: create folder for wbadm
+  file: path=/srv/wanna-build/tmp state=directory mode=0755 owner=wbadm
+- file: path=/srv/buildd.debian.org state=directory mode=0755 owner=wbadm
+
+- debug: var=out
+  tags: debug
+
+  roles:
+- role: sshcert
+  TYPE: "server"
+
+- role: postgresql
+  database_name: "wannadb"
+  database_user: "wbadm"
+  pg_service_name: "wanna-build"

@@ -31,3 +31,11 @@ uninstall buildd wannabuild
 
 done
 ======================================================
+
+Rewrite chroot image create script to playbook
+
+======================================================
+
+build jessie-proposed-updates & jessie-updates
+
+======================================================

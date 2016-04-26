@@ -1,14 +1,10 @@
 # import-packages-to-wanna-db.yml 
 ---
 - name: import packages to wanna databae
-  hosts: wanna-build-server-test
-  gather_facts: False
-  tasks:
-    - name: import packages to wanna databae
-      script: ./scripts/trigger.local
-      become_user: wbadm
-      become: True
-      register: out
+  script: ../files/trigger.local
+  become_user: wbadm
+  become: True
+  register: out
 
-    - debug: var=out
+- debug: var=out
 

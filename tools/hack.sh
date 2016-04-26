@@ -1,3 +1,3 @@
 #!/bin/bash
-alias wannaplay='ansible-playbook ./control-wanna-server.yml -t'
+alias wannaplay='ansible-playbook ./control-wannabuild.yml -t'
 

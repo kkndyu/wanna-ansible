@@ -9,10 +9,13 @@
       ansible-playbook ./control-buildd.yml [-l some hosts] -t usage
       ansible-playbook ./control-buildd.yml -t enable-buildd,debug
       ansible-playbook ./control-buildd.yml -t disable-buildd  -e ''
+      ansible-playbook ./control-buildd.yml -t upload,debug
+      ansible-playbook ./control-buildd.yml -t upload-fails,debug
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')
       tags: usage
+      run_once: true
 
     - name: enable-buildd
       shell: |
@@ -33,6 +36,32 @@
       register: out
       tags:
         - disable-buildd
+    
+    - name: upload
+      shell: |
+        cd ~buildd/upload
+        for changes_file in *.changes ; do
+            _fname=`basename $changes_file`
+            _fname="${_fname%.changes}.upload"
+        if test -f "./$_fname"; then echo "skipping ${_fname%.upload} ..."; continue; fi
+        sudo -u buildd dupload  --to httc-buildd-upload $changes_file
+        done 
+      become: Ture
+      become_user: buildd
+      register: out
+      tags:
+        - upload
+    
+    - name: show upload failed packages
+      shell: |
+        for changes_file in ~buildd/upload/*.changes ; do
+            _path="${changes_file%.changes}.upload"
+            test -f "$_path" && continue
+            _fname=`basename $changes_file`; echo "$_fname"
+        done
+      register: out
+      tags:
+        - upload-fails
 
     - debug: var=out.stdout_lines
       tags: debug

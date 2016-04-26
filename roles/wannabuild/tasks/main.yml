@@ -37,7 +37,12 @@
 
 - name: create folder for wbadm
   file: path=/srv/wanna-build/tmp state=directory mode=0755 owner=wbadm
-- file: path=/srv/buildd.debian.org state=directory mode=0755 owner=wbadm
+
+# if want to use wanna trigger code
+# (and not to change its PAS variable)
+# PAS file should save at /srv/buildd.debian.org
+- name: place for Packages-arch-specific
+  file: path=/srv/buildd.debian.org state=directory mode=0755 owner=wbadm
 
 - debug: var=out
   tags: debug

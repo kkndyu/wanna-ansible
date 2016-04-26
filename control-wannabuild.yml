@@ -20,6 +20,7 @@
     - name: print Usage
       debug: var=USAGE.split('\n')
       tags: usage
+      run_once: true
 
     - name: reset all packages of one suite to needs-build
       # there two kind of package name+version, can't use : as FS

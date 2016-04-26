@@ -1,0 +1,39 @@
+---
+# tasks file for wannabuild/uninstall
+#- name: uninstall wanna-build
+#  shell: echo {{ TEST_FOR_NEST }}
+#  register: out
+
+- name: uninstall perl dependency
+  apt: >
+    pkg={{item}} state=absent purge=yes
+  with_items:
+    - procmail
+    - dctrl-tools
+    - moreutils
+    - libdpkg-perl
+    - libdbi-perl
+    - libyaml-tiny-perl
+    - libhash-merge-perl
+    - libstring-format-perl
+    - libtimedate-perl
+    - libyaml-libyaml-perl
+    - liburi-perl
+    - libdbd-pg-perl
+    - dose-builddebcheck
+
+- name: remove wanna-build folder
+  file: path=/srv/wanna-build state=absent
+
+- name: remove wanna-build bin
+  file: path=/usr/bin/wanna-build state=absent
+
+- name: remove user
+  user: name=wbadm state=absent
+
+- name: remove PAS folder
+  file: path=/srv/buildd.debian.org state=absent
+
+
+
+- debug: var=out

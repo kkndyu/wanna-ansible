@@ -1,0 +1,40 @@
+---
+# tasks file for sshcert/uninstall
+
+- name: remove CA pub
+  file: >
+    path=/etc/ssh/{{CA_PUB}}
+    state=absent
+  when: TYPE == "server"
+
+- name: remove  TrustedUserCAKeys from sshd_config
+  shell: |
+    if grep -e "TrustedUserCAKeys" /etc/ssh/sshd_config ; then
+        sed -i '/^TrustedUserCAKeys.*/d' /etc/ssh/sshd_config
+        kill -HUP `cat /run/sshd.pid`
+    fi
+  when: TYPE == "server"
+
+- name: remove host cert
+  file: >
+    path=/etc/ssh/ssh_host_rsa_key-cert.pub
+    state=absent
+  when: TYPE == "server"
+
+- name: remove  HostCertificate from sshd_config
+  shell: |
+    if grep -e HostCertificate /etc/ssh/sshd_config ; then
+        sed -i '/^HostCertificate.*/d' /etc/ssh/sshd_config
+        kill -HUP `cat /run/sshd.pid`
+    fi
+  register: out
+  when: TYPE == "server"
+
+- name: remove user .ssh
+  file: path={{USER_HOME}}/.ssh state=absent
+  when: TYPE == "client"
+
+- name: uninstall CA
+  file: path=/etc/ssh/ssh_known_hosts state=absent
+  when: TYPE == "client"
+

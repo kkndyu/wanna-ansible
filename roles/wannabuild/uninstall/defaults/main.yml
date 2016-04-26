@@ -1,0 +1,4 @@
+---
+# defaults file for wannabuild
+
+TEST_FOR_NEST: "in a nest role"

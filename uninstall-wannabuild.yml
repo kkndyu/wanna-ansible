@@ -1,0 +1,20 @@
+# uninstall-wannabuild.yml
+---
+- name: install wanna-build server code
+  # Get hosts in command-line when dev
+  # avoid play in wrong host
+  hosts: "{{ HOST }}"
+  gather_facts: True
+  pre_tasks:
+    - name: clean up enviroment
+      shell: |
+        # remove line in sshd_config
+        ls -al
+      register: out
+
+    - debug: var=out
+      tags: debug
+
+  roles:
+    - role: wannabuild/uninstall
+

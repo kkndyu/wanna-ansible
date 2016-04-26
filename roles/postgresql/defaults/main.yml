@@ -1,3 +1,9 @@
 ---
 # defaults file for postgresql
 pg_version: 9.4
+
+database_name: "wannadb"
+
+database_user: "wbadm"
+
+pg_service_name: "wanna-build"

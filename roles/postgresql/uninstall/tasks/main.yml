@@ -1,0 +1,31 @@
+---
+# tasks file for postgresql/uninstall
+
+- name: remove database exists
+  postgresql_db:
+    name: "{{ database_name }}"
+    state: "absent"
+  sudo: True
+  sudo_user: postgres
+
+- name: remove user exists
+  postgresql_user:
+    name: "{{ database_user }}"
+    state: "absent"
+  sudo: True
+  sudo_user: postgres
+
+- name: remove postgresql-common conf
+  file: >
+    path=/etc/postgresql-common/pg_service.conf
+    state=absent
+
+- name: uninstall postgresql packages
+  apt: >
+    pkg={{ item }} state=absent purge=yes
+  with_items:
+    - libpq-dev
+    - postgresql-{{ pg_version }}
+    - postgresql-{{ pg_version }}-debversion
+    - python-psycopg2
+    - postgresql-common

@@ -1,0 +1,50 @@
+---
+# defaults file for buildd/uninstall
+ARCH: amd64
+ADMIN_MAIL: buildd@baixibao.com
+
+SUITE: jessie
+SUITE_FOR_DEBOOTSTRAP: jessie
+
+CHROOT_NAME: buildd_{{SUITE}}_{{ARCH}}_chroot
+
+#
+# for LVM chroot
+#
+CHROOT_SIZE: 9G
+
+BUILDD_KEY_ID: 2BCC55B8
+
+#
+# vm_wanna_amd64
+#
+WANNA_HOST: 10.0.2.107
+
+#
+# Dak host
+#
+REPREPRO_HOST: 10.0.2.129
+
+#
+# buildd repo
+#
+BUILDD_REPO_URL:
+
+#
+# vm_dak_amd64
+#
+MIRROR: http://10.0.2.129/bxbos
+
+#
+# just in case that the source packages are in a different repository
+#
+MIRROR_SOURCE:
+
+BUILDD_CHROOT_IMAGE_FILE: httc-buildd-chroot.tar.gz
+
+CHROOT_IMAGE_URL: http://10.0.2.129/download/{{BUILDD_CHROOT_IMAGE_FILE}}
+
+#
+# the real path of /buildd
+#
+BUILDD_WORKSPACE: /data/buildd_topdir

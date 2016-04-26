@@ -1,0 +1,28 @@
+---
+# tasks file for buildd/uninstall
+- name: uninstall  packages
+  apt: >
+    pkg={{ item }} state=absent purge=yes
+  with_items:
+    - sbuild
+    - buildd
+    - schroot
+    - dupload
+
+- name: remove buildd workspace
+  file: >
+    path={{BUILDD_WORKSPACE}}
+    state=absent
+
+- name: remove /buildd link
+  shell: |
+    test -L /buildd && rm /buildd
+
+# remove gpg keys
+# Now the user of buildd has been removed
+# how to remove gpg keys?
+
+- debug: var=out
+  tags: debug
+
+

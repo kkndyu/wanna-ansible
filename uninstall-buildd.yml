@@ -1,0 +1,19 @@
+# uninstall-wannabuild.yml
+---
+- name: install wanna-build server code
+  # Get hosts in command-line when dev
+  # avoid play in wrong host
+  hosts: "{{ HOST }}"
+  gather_facts: True
+  pre_tasks:
+    - name: clean up enviroment
+      script: ./scripts/cleanup-buildd-host.sh
+      register: out
+      ignore_errors: true
+
+    - debug: var=out
+      tags: debug
+
+  roles:
+    - role: buildd/uninstall
+

@@ -1,0 +1,94 @@
+#!/bin/bash
+# vim:set et ts=4 sw=4 ft=bash ai:
+
+# WARNING: This script works only for main (no contrib)
+
+ARCHIVE='local'
+SUITES="jessie"
+ARCHES="amd64"
+
+REPOSITORY='/srv/wanna-build/tmp/bxbos'
+MIRROR_SOURCE="http://10.0.2.129/bxbos"
+cd /srv/wanna-build/triggers
+. common
+
+# Redirect the output to a log file
+#exec >> /org/wanna-build/db/merge.$ARCHIVE.log 2>&1
+
+if [ ! -d $REPOSITORY ]
+then
+	echo "Could not find repository $REPOSITORY, create it"
+    mkdir -p $REPOSITORY
+#	exit 1
+fi
+
+if [ -f /org/wanna-build/NO-TRIGGERS ]
+then
+	echo Trigger for $ARCHIVE skipped due to NO-TRIGGERS, aborting. >&2
+	exit 0
+fi
+
+echo "`date`: Running trigger for $ARCHIVE ..."
+
+fetch() {
+	src="$1"
+	dest="$2"
+
+	if [ -f "$src" ]
+	then
+		mkdir -p "$dest"
+		cp "$src" "$dest"
+	fi
+}
+
+filter_out_nonfree() {
+    local INPUT="$1"
+    local OUTPUT="$2"
+
+    gunzip -c "$INPUT" | grep-dctrl -v -r -F Section 'non-free/.*' | gzip -c > "$OUTPUT"
+}
+
+main() {
+	set -eE
+    # When no action specified in trap
+    # Default activity is to exit shell
+    # here specify cleanup, defined in common
+	trap cleanup ERR TERM HUP INT QUIT
+
+	ensure_lock
+	ensure_workdir
+
+	for suite in $SUITES
+	do
+        wget -P /srv/buildd.debian.org/web/quinn-diff/${SUITE}/ https://buildd.debian.org/quinn-diff/${SUITE}/Packages-arch-specific
+    done
+
+	# Fetch the most recent Packages and Sources files.
+	for suite in $SUITES
+	do
+        wget -P $REPOSITORY/$suite/main/source/ $MIRROR_SOURCE/dists/$suite/main/source/Sources.gz   
+        fetch "$REPOSITORY/$suite/main/source/Sources.gz" "$ARCHIVE_BASE/archive/$suite/main/source/"
+		#fetch "$REPOSITORY/$suite/contrib/source/Sources.gz" "$ARCHIVE_BASE/archive/$suite/contrib/source/"
+
+		for arch in $ARCHES
+		do
+			wget -P $REPOSITORY/$suite/main/binary-$arch/ $MIRROR_SOURCE/dists/$suite/main/binary-$arch/Packages.gz
+            fetch "$REPOSITORY/$suite/main/binary-$arch/Packages.gz" "$ARCHIVE_BASE/archive/$suite/main/binary-$arch/"
+			#fetch "$REPOSITORY/$suite/contrib/binary-$arch/Packages.gz" "$ARCHIVE_BASE/archive/$suite/contrib/binary-$arch/"
+		done
+	done
+
+	for suite in $SUITES
+	do
+		SOURCES="Sources.$suite.incoming-filtered.gz"
+		filter_out_nonfree "$ARCHIVE_BASE/archive/$suite/main/source/Sources.gz" "$SOURCES"
+		PACKAGES="$ARCHIVE_BASE/archive/$suite/main/binary-%ARCH%/Packages.gz"
+		trigger_wb_update "$suite" "$ARCHES" "$SOURCES" "$PACKAGES"
+	done
+
+	cleanup
+}
+
+main
+exit 0
+

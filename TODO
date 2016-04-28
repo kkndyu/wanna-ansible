@@ -34,6 +34,7 @@ done
 
 Rewrite chroot image create script to playbook
 
+done
 ======================================================
 
 build jessie-proposed-updates & jessie-updates

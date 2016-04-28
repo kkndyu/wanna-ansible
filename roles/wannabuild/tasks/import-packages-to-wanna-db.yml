@@ -5,6 +5,14 @@
   become_user: wbadm
   become: True
   register: out
+  when: NEW is not defined
+
+- name: import packages to wanna databae
+  script: ../files/trigger-jpu.local
+  become_user: wbadm
+  become: True
+  register: out
+  when: NEW is defined
 
 - debug: var=out
 

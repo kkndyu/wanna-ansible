@@ -50,6 +50,9 @@ filter_out_nonfree() {
 
 main() {
 	set -eE
+    # When no action specified in trap
+    # Default activity is to exit shell
+    # here specify cleanup, defined in common
 	trap cleanup ERR TERM HUP INT QUIT
 
 	ensure_lock

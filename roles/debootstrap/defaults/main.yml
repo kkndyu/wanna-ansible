@@ -1,0 +1,19 @@
+---
+# defaults file for debootstrap
+
+SUITE: jessie
+ARCH: amd64
+
+include_packages: build-essential,fakeroot,apt-utils
+
+# Everyyime {{chroot_dir}} a new value generate
+# change to use set_fact in task
+# chroot_dir: "{{ lookup('pipe', 'mktemp -p /tmp -d chroot-XXXX') }}"
+
+chroot_dir: /tmp
+
+MIRROR: http://10.0.2.129/bxbos
+
+variant: buildd
+
+BUILDD_CHROOT_IMAGE_FILE: httc-buildd-chroot.tar.gz

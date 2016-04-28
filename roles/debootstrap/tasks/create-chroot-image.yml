@@ -1,0 +1,82 @@
+---
+# tasks for create chroot image
+
+- name: install debootstrap
+  apt: >
+   pkg=debootstrap update_cache=yes cache_valid_time=3600
+   force=yes install_recommends=no state=present
+  tags: debootstrap
+
+- name: get mktemp name
+  shell: |
+    mktemp -p /tmp -d chroot-XXXX
+  register: mktemp_name
+  tags: debootstrap
+
+- set_fact: chroot_dir={{mktemp_name.stdout}}
+  tags: debootstrap
+
+- name: debootstrap
+  command: debootstrap
+           --arch={{ARCH}}
+           --include={{include_packages}}
+           --no-check-gpg
+           --keep-debootstrap-dir
+           --variant={{variant}}
+           {{SUITE}} {{chroot_dir}} {{MIRROR}}
+  register: out
+  tags: debootstrap
+
+- name: add force-unsafe-io to chroot
+  shell: |
+    echo "force-unsafe-io" > "{{chroot_dir}}/etc/dpkg/dpkg.cfg.d/force-unsafe-io"
+  tags: debootstrap
+
+- name: add policy-rc.d to prevent service autostart
+  template: >
+    src=policy-rc.d.j2
+    dest={{chroot_dir}}/usr/sbin/policy-rc.d
+    mode=0755
+  tags: debootstrap
+
+- name: edit chroot apt sources.list
+  template: >
+    src=sources.list.j2
+    dest={{chroot_dir}}/etc/apt/sources.list
+  tags: debootstrap
+
+# Do we need to call apt-get update here ?
+- name: apt-get update in chroot
+  shell: |
+    mount -t proc proc {{chroot_dir}}/proc
+    mount -t sysfs sysfs {{chroot_dir}}/sys
+    mount --bind /dev {{chroot_dir}}/dev
+    mount --bind /dev/pts {{chroot_dir}}/dev/pts
+    chroot {{chroot_dir}} << " EOF"
+    apt-get update
+    apt-get clean
+    EOF
+    umount {{chroot_dir}}/proc 
+    umount {{chroot_dir}}/sys 
+    umount {{chroot_dir}}/dev/pts
+    umount {{chroot_dir}}/dev 
+  register: out
+  tags: debootstrap
+
+- name: tar it
+  shell: |
+   tar -p -C {{chroot_dir}} -czf /tmp/{{BUILDD_CHROOT_IMAGE_FILE}} .
+  tags: debootstrap
+
+- name: fetch it
+  fetch: >
+    src=/tmp/{{BUILDD_CHROOT_IMAGE_FILE}}
+    dest=/tmp/chroot/{{inventory_hostname}}/
+    flat=yes
+  run_once: True  
+  tags: debootstrap
+
+# Upload it?
+
+- debug: var=out
+  tags: debootstrap

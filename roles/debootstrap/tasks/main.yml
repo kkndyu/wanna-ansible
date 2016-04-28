@@ -1,0 +1,4 @@
+---
+# tasks file for debootstrap
+
+- include: ./create-chroot-image.yml

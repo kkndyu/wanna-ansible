@@ -41,3 +41,7 @@ build jessie-proposed-updates & jessie-updates
 
 done
 ======================================================
+
+rewrite trigger.local script to playbook
+
+======================================================

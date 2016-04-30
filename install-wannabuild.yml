@@ -15,7 +15,8 @@
 
     - debug: var=out
       tags: debug
-
+  
+  # when defined NEW, means install jessie-proposed-updates
   roles:
-    - role: wannabuild
+    - { role: wannabuild , NEW: "True" }
 

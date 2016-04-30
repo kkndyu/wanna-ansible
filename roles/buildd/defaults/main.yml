@@ -48,3 +48,5 @@ CHROOT_IMAGE_URL: http://10.0.2.129/download/{{BUILDD_CHROOT_IMAGE_FILE}}
 # the real path of /buildd
 #
 BUILDD_WORKSPACE: /data/buildd_topdir
+
+DUPLOAD_INCOMING: /Incoming_buildd

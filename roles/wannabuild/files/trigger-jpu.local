@@ -4,7 +4,8 @@
 # WARNING: This script works only for main (no contrib)
 
 ARCHIVE='local'
-SUITES="jessie"
+SUITE_FOR_PAS="jessie"
+SUITES="jessie-proposed-updates"
 ARCHES="amd64"
 
 REPOSITORY='/srv/wanna-build/tmp/bxbos'
@@ -60,7 +61,7 @@ main() {
 
 	for suite in $SUITES
 	do
-        wget -P /srv/buildd.debian.org/web/quinn-diff/${SUITE}/ https://buildd.debian.org/quinn-diff/${SUITE}/Packages-arch-specific
+        wget -P /srv/buildd.debian.org/web/quinn-diff/${suite}/ https://buildd.debian.org/quinn-diff/${SUITE_FOR_PAS}/Packages-arch-specific
     done
 
 	# Fetch the most recent Packages and Sources files.

@@ -1,4 +1,7 @@
 # install-buildd.yml
+# Usage:
+# if install buildd for jessie-proposed-updates
+# ansible-playbook ./install-buildd.yml -e HOST=buildd4*  -e SUITE=jessie-proposed-updates -e WANNA_HOST= -e DUPLOAD_INCOMING=
 ---
 - name: install buildd at compiling hosts
   hosts: "{{ HOST }}"

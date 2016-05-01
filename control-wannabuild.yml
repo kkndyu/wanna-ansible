@@ -17,10 +17,11 @@
       Usage:
       wannaplay reset-all
       ansible-playbook ./control-wannabuild.yml -t usage -e HOST=all
-      ansible-playbook ./control-wannabuild.yml -t reset-all,debug  -e HOST=buildd4* -e SUITE=jessie-proposed-updates -e LIST=bd-uninstallable
+      ansible-playbook ./control-wannabuild.yml -t reset-all,debug  -e HOST=buildd4* -e SUITE=jessie-proposed-updates -e STATE=bd-uninstallable
       ansible-playbook ./control-wannabuild.yml -t reset-by-name,debug  -e 'PACKAGES=tagainijisho_1.0.2-1'
       ansible-playbook ./control-wannabuild.yml -t query-by-name,debug  --extra-vars 'PACKAGES=tagainijisho_1.0.2-1,nut_2.7.2-4'
       ansible-playbook ./control-wannabuild.yml -t reset-by-list,debug  --extra-vars 'PLIST=X11.list'
+      ansible-playbook ./control-wannabuild.yml -t export-list,debug  -e HOST=buildd4* -e SUITE=jessie-proposed-updates -e STATE=bd-uninstallable
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')
@@ -76,6 +77,23 @@
       register: out
       tags:
         - reset-by-list
+    
+    - name: export package list
+      shell: |
+        sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --list={{STATE}} |
+        awk  ' {split($1,parts,"/");if(parts[2]!="") print parts[2]}' |
+        sed  's/:$//g' > /tmp/{{STATE}}.list
+      register: out
+      tags:
+        - export-list
+
+    - name: fetch list here
+      fetch: >
+        src=/tmp/{{STATE}}.list
+        dest=/tmp/fetched/{{inventory_hostname}}/
+        flat=yes
+      tags:
+        - export-list
 
     - debug: var=out.stdout_lines
       tags: debug

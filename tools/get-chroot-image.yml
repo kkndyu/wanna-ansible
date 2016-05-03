@@ -1,0 +1,27 @@
+# get-chroot-image.yml
+---
+- name: get chroot image
+  hosts: "{{HOST}}"
+  gather_facts: True
+  vars:
+    BUILDD_CHROOT_IMAGE_FILE: httc-buildd-chroot.tar.gz
+    download: /baixibao_repo/buildd_repo_root/download
+    server: dak-server
+  pre_tasks:
+    - name: clean up
+      shell: |
+        echo "clean up"
+      register: out
+
+  roles:
+    - role: debootstrap
+
+  post_tasks:
+    - name: upload
+      copy: >
+        src=/tmp/chroot/{{inventory_hostname}}/{{BUILDD_CHROOT_IMAGE_FILE}}
+        dest={{download}}/
+        mode=0644
+      run_once: True
+      delegate_to: {{server}}
+      tags: upload

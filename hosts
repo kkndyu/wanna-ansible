@@ -10,3 +10,6 @@ buildd3-httcloud ansible_ssh_host=10.0.2.140  ansible_ssh_pass=httc
 buildd4-httcloud ansible_ssh_host=10.0.2.114  ansible_ssh_pass=httc
 buildd5-httcloud ansible_ssh_host=10.0.2.126  ansible_ssh_pass=httc
 buildd6-httcloud ansible_ssh_host=10.0.2.127  ansible_ssh_pass=httc
+
+[repo]
+dak-server ansible_ssh_host=10.0.2.129  ansible_ssh_pass=httc

@@ -1,0 +1,53 @@
+---
+# tasks file for reprepro
+
+- name: install package
+  apt: >
+    pkg={{ item }} update_cache=yes cache_valid_time=3600
+    force=yes install_recommends=no state=present
+  with_items:
+    - reprepro
+    - nginx
+
+- name: make reprepro root dir
+  shell: |
+    mkdir -p /data/reprepro
+    cd /data/reprepro
+    mkdir conf dists incoming indices logs pool project
+
+- name: copy distribution conf
+  template: >
+    src=distributions.j2
+    dest=/data/reprepro/conf/distributions
+
+- name: echo option
+  shell: |
+    echo verbose > /data/reprepro/conf/options
+
+- name: touch in indices
+  shell: |
+    cd /data/reprepro/indices
+    touch override.{{SUITE}}.main
+    touch override.{{SUITE}}.main.debian-installer
+    touch override.{{SUITE}}.main.src
+
+- name: export repo
+  shell: |
+    reprepro -vb /data/reprepro export
+  register: out
+
+- debug: var=out
+
+- name: change mode
+  shell: |
+    cd /data/reprepro
+    chmod -R go-r conf
+    chmod -R go-r db
+
+- name: change nginx conf
+  shell: |
+    sed -i '/root \/var\/www\/html/a\\tautoindex on;'  /etc/nginx/sites-enabled/default
+  notify: restart nginx
+
+
+

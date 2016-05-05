@@ -1,0 +1,6 @@
+---
+# defaults file for reprepro
+
+SUITE: jessie
+
+ARCH: amd64

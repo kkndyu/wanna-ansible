@@ -51,3 +51,12 @@ treat it as a new SUITE <- NOW WE USE
 as a overlay in trigger <- SHOULD TRY
 
 ======================================================
+
+local sbuild script
+
+======================================================
+
+Find the update package in debian
+Update policy
+
+======================================================

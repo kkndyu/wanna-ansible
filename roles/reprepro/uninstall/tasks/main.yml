@@ -1,0 +1,17 @@
+---
+# tasks file for reprepro
+- name: stop nginx
+  service: name=nginx state=stopped
+
+- name: uninstall package
+  apt: >
+    pkg={{ item }} state=absent 
+    purge=yes autoremove=yes
+  with_items:
+    - reprepro
+    - nginx
+
+- name: remove reprepro root dir
+  shell: |
+    rm -rf /data/reprepro
+

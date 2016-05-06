@@ -93,7 +93,7 @@ main() {
 
         SOURCES_BASE="$ARCHIVE_BASE/archive/$suite/main/source/Sources.gz"
         PACKAGES_BASE="$ARCHIVE_BASE/archive/$suite/main/binary-%ARCH%/Packages.gz"
-		trigger_wb_update_for_overlay "$suite" "$ARCHES" "$SOURCES_BASE" "$PACKAGES_BASE" "$SOURCES" "$PACKAGES" 
+		trigger_wb_update_with_secondary "${suite}-proposed-updates" "$ARCHES" "$PACKAGES_BASE" "$SOURCES" "$PACKAGES" "${suite}-proposed-updates"
 	done
 
 	cleanup

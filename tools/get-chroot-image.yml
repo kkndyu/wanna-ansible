@@ -14,7 +14,7 @@
       register: out
 
   roles:
-    - role: debootstrap
+    - role: ../roles/debootstrap
 
   post_tasks:
     - name: upload
@@ -23,5 +23,5 @@
         dest={{download}}/
         mode=0644
       run_once: True
-      delegate_to: {{server}}
+      delegate_to: "{{server}}"
       tags: upload

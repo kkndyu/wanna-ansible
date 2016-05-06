@@ -19,6 +19,11 @@ chroot_dir: /tmp
 MIRROR: http://10.0.2.129/bxbos
 
 #
+# update mirror source.list in chroot
+#
+UPDATE_MIRROR: http://10.0.2.114/bxbos jessie-proposed-updates main
+
+#
 # the --variant option for debootstrap
 #
 variant: buildd

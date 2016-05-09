@@ -11,6 +11,7 @@
       ansible-playbook ./control-buildd.yml -t disable-buildd  -e ''
       ansible-playbook ./control-buildd.yml -t upload,debug
       ansible-playbook ./control-buildd.yml -t upload-fails,debug
+      ansible-playbook ./control-buildd.yml -t update-chroot,debug
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')

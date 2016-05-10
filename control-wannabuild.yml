@@ -26,6 +26,7 @@
       ansible-playbook ./control-wannabuild.yml -t import,debug  -e HOST=buildd4*
       ansible-playbook ./control-wannabuild.yml -t import-overlay,debug  -e HOST=buildd4*
       ansible-playbook ./control-wannabuild.yml -t import-secondary,debug  -e HOST=buildd4*
+      ansible-playbook ./control-wannabuild.yml -t query-statistic,debug  -e HOST=buildd4*
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')
@@ -131,6 +132,13 @@
       register: out
       tags:
         - import-secondary
+    
+    - name: wannadb statistic
+      shell: |
+        sudo -u wbadm /srv/wanna-build/bin/wanna-build-statistics --database={{ARCH}} --dist={{SUITE}} 
+      register: out
+      tags:
+        - query-statistic
 
     - debug: var=out.stdout_lines
       tags: debug

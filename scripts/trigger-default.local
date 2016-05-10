@@ -5,7 +5,7 @@
 
 ARCHIVE='local'
 SUITE_FOR_PAS="jessie"
-SUITES="jessie-proposed-updates"
+SUITES="jessie"
 ARCHES="amd64"
 
 REPOSITORY='/srv/wanna-build/tmp/bxbos'
@@ -31,16 +31,6 @@ fi
 
 echo "`date`: Running trigger for $ARCHIVE ..."
 
-fetch() {
-	src="$1"
-	dest="$2"
-
-	if [ -f "$src" ]
-	then
-		mkdir -p "$dest"
-		cp "$src" "$dest"
-	fi
-}
 
 filter_out_nonfree() {
     local INPUT="$1"
@@ -82,7 +72,7 @@ main() {
 		SOURCES="Sources.$suite.incoming-filtered.gz"
 		filter_out_nonfree "$ARCHIVE_BASE/archive/$suite/main/source/Sources.gz" "$SOURCES"
 		PACKAGES="$ARCHIVE_BASE/archive/$suite/main/binary-%ARCH%/Packages.gz"
-		trigger_wb_update "jessie" "$ARCHES" "$SOURCES" "$PACKAGES"
+		trigger_wb_update "$suite" "$ARCHES" "$SOURCES" "$PACKAGES"
 	done
 
 	cleanup

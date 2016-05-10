@@ -1,0 +1,15 @@
+# get-chroot-image.yml
+---
+- name: get chroot image
+  hosts: "{{HOST}}"
+  gather_facts: False
+  vars:
+    BUILDD_CHROOT_IMAGE_FILE: httc-buildd-chroot.tar.gz
+    download: /baixibao_repo/buildd_repo_root/download
+    server: dak-server
+  tasks:
+    - name: compare wannadb
+      script: ./compare-source-version-between-repo-and-wannadb.pl
+      register: out
+
+    - debug: var=out

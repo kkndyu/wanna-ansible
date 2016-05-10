@@ -60,3 +60,9 @@ Find the update package in debian
 Update policy
 
 ======================================================
+
+update package version
+change wannadb directly 
+trigger buildd
+
+======================================================

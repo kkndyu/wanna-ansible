@@ -67,3 +67,10 @@ change wannadb directly
 trigger buildd
 
 ======================================================
+
+vars in roles
+vars in playbook
+vars in commandline
+there SHOULD be a policy to define vars only once!!
+
+======================================================

@@ -4,6 +4,8 @@ use DBI;
 use DBD::Pg; 
 use Dpkg::Version; # apt-get install libdpkg-perl
 
+my $SUITE="jessie-proposed-updates";
+
 #
 # Get Sources.gz
 #
@@ -65,7 +67,7 @@ my $dbh=DBI->connect("dbi:Pg:dbname=$dbname;host=$host;port=$port",$uname,$pw,{A
 #
 my ($pcount, $count) = (0, 0);
 foreach my $key (sort keys %hash) {
-    my $sth=$dbh->prepare("select *  from packages where package = \'$key\' and distribution = \'jessie\'"); 
+    my $sth=$dbh->prepare("select *  from packages where package = \'$key\' and distribution = \'$SUITE\'"); 
     $sth->execute();
 
     while (my $row = $sth->fetchrow_hashref) {
@@ -82,13 +84,13 @@ foreach my $key (sort keys %hash) {
                      "state=\'Needs-Build\', ".
                      "state_change=now() ".
                      "where package=? ".
-                     "and distribution = \'jessie\'",
+                     "and distribution = \'$SUITE\'",
                      undef, $hash{$key}, $key) or die $dbh->errstr;
             $dbh->do("INSERT INTO transactions " .
                      "(package, distribution, version, action, " .
                      "prevstate, state, real_user, set_user, time) " .
                      "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                     undef, $key, 'jessie', $hash{$key}, 'Direct-Change',
+                     undef, $key, $SUITE, $hash{$key}, 'Direct-Change',
                      $row->{state}, 'Needs-Build', 'wbadm', 
                      'wbadm', 'now()') or die $dbh->errstr;
         }

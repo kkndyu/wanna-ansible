@@ -4,6 +4,8 @@
   hosts: buildd
   gather_facts: False
   vars:
+    BUILDD_CHROOT_IMAGE_FILE: httc-buildd-chroot.tar.gz
+    CHROOT_IMAGE_URL: http://10.0.2.129/download/{{BUILDD_CHROOT_IMAGE_FILE}}
     USAGE: |
       Usage:
       ansible-playbook ./control-buildd.yml [-l some hosts] -t usage
@@ -37,7 +39,7 @@
       register: out
       tags:
         - disable-buildd
-    
+
     - name: upload
       shell: |
         cd ~buildd/upload
@@ -52,7 +54,7 @@
       register: out
       tags:
         - upload
-    
+
     - name: show upload failed packages
       shell: |
         for changes_file in ~buildd/upload/*.changes ; do
@@ -63,6 +65,15 @@
       register: out
       tags:
         - upload-fails
+
+    - name: update chroot in buildd machines
+      shell: |
+        cd /data/buildd_topdir/
+        test -f {{BUILDD_CHROOT_IMAGE_FILE}} && rm {{BUILDD_CHROOT_IMAGE_FILE}}
+        wget {{CHROOT_IMAGE_URL}}
+      register: out
+      tags:
+        - update-chroot
 
     - debug: var=out.stdout_lines
       tags: debug

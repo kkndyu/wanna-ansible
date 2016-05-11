@@ -27,6 +27,7 @@
       ansible-playbook ./control-wannabuild.yml -t import-overlay,debug  -e HOST=buildd4*
       ansible-playbook ./control-wannabuild.yml -t import-secondary,debug  -e HOST=buildd4*
       ansible-playbook ./control-wannabuild.yml -t query-statistic,debug  -e HOST=buildd4*
+      ansible-playbook ./control-wannabuild.yml -t list-package,debug  -e HOST=buildd4* -e STATE=bd-uninstallable
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')
@@ -105,7 +106,8 @@
         sudo -u wbadm /usr/bin/wanna-build -A {{ARCH}} --dist={{SUITE}} --list={{STATE}} |
         awk  ' {split($1,parts,"/");if(parts[2]!="") print parts[2]}' |
         sed  's/:$//g' |
-        while read line; do sudo -u wbadm wanna-build -A amd64 -d jessie --forget $line ; done
+        while read line; do sudo -u wbadm wanna-build -A {{ARCH}} -d {{SUITE}} --forget $line ; done
+      register: out
       tags:
         - clear-wannadb
     
@@ -139,6 +141,13 @@
       register: out
       tags:
         - query-statistic
+    
+    - name: wannadb list packages
+      shell: |
+        sudo -u wbadm wanna-build -A {{ARCH}} --dist={{SUITE}} -l {{STATE}}
+      register: out
+      tags:
+        - list-package
 
     - debug: var=out.stdout_lines
       tags: debug

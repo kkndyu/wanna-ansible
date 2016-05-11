@@ -5,7 +5,7 @@
 
 ARCHIVE='local'
 SUITE_FOR_PAS="jessie"
-SUITES="jessie"
+SUITES="jessie-proposed-updates"
 ARCHES="amd64"
 
 REPOSITORY='/srv/wanna-build/tmp/bxbos'

@@ -74,7 +74,25 @@ foreach my $key (sort keys %hash) {
         if ( $v1 >  $v2 ) { 
             printf("%-35s %-35s %-35s\n", $key, $row->{version}, $hash{$key});
             $count++;
+            #
+            # uodate database
+            #
+            $dbh->do("update packages set " . 
+                     "version=?, " . 
+                     "state=\'Needs-Build\', ".
+                     "state_change=now() ".
+                     "where package=? ".
+                     "and distribution = \'jessie\'",
+                     undef, $hash{$key}, $key) or die $dbh->errstr;
+            $dbh->do("INSERT INTO transactions " .
+                     "(package, distribution, version, action, " .
+                     "prevstate, state, real_user, set_user, time) " .
+                     "values (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                     undef, $key, 'jessie', $hash{$key}, 'Direct-Change',
+                     $row->{state}, 'Needs-Build', 'wbadm', 
+                     'wbadm', 'now()') or die $dbh->errstr;
         }
+
     }
 
     $pcount++;

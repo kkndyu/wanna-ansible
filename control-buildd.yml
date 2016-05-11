@@ -14,6 +14,7 @@
       ansible-playbook ./control-buildd.yml -t upload,debug
       ansible-playbook ./control-buildd.yml -t upload-fails,debug
       ansible-playbook ./control-buildd.yml -t update-chroot,debug
+      ansible-playbook ./control-buildd.yml -t change-wannahost,debug -e NEWIP=
   tasks:
     - name: print Usage
       debug: var=USAGE.split('\n')
@@ -74,6 +75,15 @@
       register: out
       tags:
         - update-chroot
+
+    - name: change wanna host in buildd.conf
+      shell: |
+        sed -i 's/[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/{{NEWIP}}/g' /etc/buildd/buildd.conf
+        test -f ~buildd/build/buildd.pid && kill  `cat ~buildd/build/buildd.pid`
+        sudo -u buildd /usr/bin/buildd-watcher
+      register: out
+      tags:
+        - change-wannahost
 
     - debug: var=out.stdout_lines
       tags: debug

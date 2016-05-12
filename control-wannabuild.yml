@@ -112,10 +112,11 @@
         - clear-wannadb
     
     - name: import packages
-      script: ./scripts/trigger-default.local
+      trigger_local: SUITES={{SUITE}}
       become_user: wbadm
       become: True
       register: out
+      ignore_errors: True
       tags:
         - import
 

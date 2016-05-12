@@ -78,7 +78,7 @@
 
     - name: change wanna host in buildd.conf
       shell: |
-        sed -i 's/[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+/{{NEWIP}}/g' /etc/buildd/buildd.conf
+        sed -i 's/\([0-9]\+\.\)\{3\}[0-9]\+/{{NEWIP}}/g' /etc/buildd/buildd.conf
         test -f ~buildd/build/buildd.pid && kill  `cat ~buildd/build/buildd.pid`
         sudo -u buildd /usr/bin/buildd-watcher
       register: out

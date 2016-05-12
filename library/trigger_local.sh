@@ -1,35 +1,28 @@
 #!/bin/bash
-# vim:set et ts=4 sw=4 ft=bash ai:
+set -e
 
-# WARNING: This script works only for main (no contrib)
+# Ansible transports arguments to modules in a file. The
+# path to the arguments file is in $1, and the file
+# contains the module's arguments like this:
+#
+#       name="Name" value=15 dest=/tmp/destfile
+#
+# This is a little dangerous (!?!), but I'm going to ask
+# the current shell to parse that file; it will set
+# variables accordingly.
 
 ARCHIVE='local'
 SUITE_FOR_PAS="jessie"
-SUITES="jessie-proposed-updates"
+SUITES="jessie"
 ARCHES="amd64"
-
-REPOSITORY='/srv/wanna-build/tmp/bxbos'
 MIRROR_SOURCE="http://10.0.2.129/bxbos"
+source ${1}   # Very, *very*, dangerous!
+
 cd /srv/wanna-build/triggers
 . common
 
-# Redirect the output to a log file
-#exec >> /org/wanna-build/db/merge.$ARCHIVE.log 2>&1
-
-if [ ! -d $REPOSITORY ]
-then
-	echo "Could not find repository $REPOSITORY, create it"
-    mkdir -p $REPOSITORY
-#	exit 1
-fi
-
-if [ -f /org/wanna-build/NO-TRIGGERS ]
-then
-	echo Trigger for $ARCHIVE skipped due to NO-TRIGGERS, aborting. >&2
-	exit 0
-fi
-
-echo "`date`: Running trigger for $ARCHIVE ..."
+exec > $ARCHIVE_BASE/trigger.log 2>&1
+echo "`date`: Running trigger for $ARCHIVE ..." 
 
 
 filter_out_nonfree() {
@@ -40,7 +33,6 @@ filter_out_nonfree() {
 }
 
 main() {
-	set -eE
     # When no action specified in trap
     # Default activity is to exit shell
     # here specify cleanup, defined in common
@@ -51,6 +43,7 @@ main() {
 
 	for suite in $SUITES
 	do
+        test -f /srv/buildd.debian.org/web/quinn-diff/${suite}/Packages-arch-specific && rm -f /srv/buildd.debian.org/web/quinn-diff/${suite}/Packages-arch-specific
         wget -P /srv/buildd.debian.org/web/quinn-diff/${suite}/ https://buildd.debian.org/quinn-diff/${SUITE_FOR_PAS}/Packages-arch-specific
     done
 
@@ -58,7 +51,7 @@ main() {
 	for suite in $SUITES
 	do
         test -f $ARCHIVE_BASE/archive/$suite/main/source/Sources.gz && rm -f $ARCHIVE_BASE/archive/$suite/main/source/Sources.gz
-        wget -P $ARCHIVE_BASE/archive/$suite/main/source/ $MIRROR_SOURCE/dists/$suite/main/source/Sources.gz   
+        wget -P $ARCHIVE_BASE/archive/$suite/main/source/ $MIRROR_SOURCE/dists/$suite/main/source/Sources.gz
 
 		for arch in $ARCHES
 		do
@@ -78,6 +71,22 @@ main() {
 	cleanup
 }
 
+    #"log": $(cat $ARCHIVE_BASE/trigger.log)
+    #"log": "Thu May 12 23:43:34 CST 2016: Running trigger for local ...+--"
 main
-exit 0
-
+exec 1>/dev/tty
+if [ $? -eq 0 ]; then
+    #echo "{\"changed\":true, \"msg\": \"OK\", \"log\": \"$(cat $ARCHIVE_BASE/trigger.log)\"}"
+    #echo "{\"changed\":true, \"msg\": \"OK\"}"
+    cat <<EOF 
+{
+    "changed": true,
+    "msg": "OK",
+    "log": "$(cat $ARCHIVE_BASE/trigger.log | tr "\n" "+" | sed "s/’//g" | sed "s/‘//g")"
+}
+EOF
+    exit 0
+else
+    echo "{\"failed\":true, \"msg\": \"some error\"}"
+    exit 0;
+fi

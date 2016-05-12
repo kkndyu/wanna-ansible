@@ -25,6 +25,7 @@ done
 change config file items
 sbuild buildd wannabuild
 
+done
 ======================================================
 
 uninstall buildd wannabuild
@@ -44,6 +45,9 @@ done
 
 rewrite trigger.local script to playbook
 
+#rewrite it to module
+#so it can use ansible vars NOW!
+done
 ======================================================
 
 Two ways to build jessie-proposed-update
@@ -60,17 +64,23 @@ local sbuild script
 Find the update package in debian
 Update policy
 
+done
 ======================================================
 
 update package version
 change wannadb directly 
 trigger buildd
 
+done
 ======================================================
 
 vars in roles
 vars in playbook
 vars in commandline
 there SHOULD be a policy to define vars only once!!
+
+======================================================
+
+Change script  to  ansible modules
 
 ======================================================

@@ -109,11 +109,12 @@ exec 1>/dev/tty
 if [ $? -eq 0 ]; then
     #echo "{\"changed\":true, \"msg\": \"OK\", \"log\": \"$(cat $ARCHIVE_BASE/trigger.log)\"}"
     #echo "{\"changed\":true, \"msg\": \"OK\"}"
+    #"stdout": "$(cat $ARCHIVE_BASE/trigger.log | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')",
     cat <<EOF 
 {
     "changed": true,
     "msg": "OK",
-    "stdout": "$(cat $ARCHIVE_BASE/trigger.log | sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g')",
+    "stdout": $(cat $ARCHIVE_BASE/trigger.log | python -c 'import json,sys; print json.dumps(sys.stdin.read())'),
     "stdout_lines": $(cat $ARCHIVE_BASE/trigger.log.list)
 
 }

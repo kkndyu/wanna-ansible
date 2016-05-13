@@ -8,8 +8,21 @@
     download: /baixibao_repo/buildd_repo_root/download
     server: dak-server
   tasks:
+    - name: install package
+      apt: >
+        pkg={{item}} update_cache=yes cache_valid_time=3600
+        force=yes install_recommends=no state=present
+      with_items:
+        - libdpkg-perl
+        - libdbi-perl
+        - libdbd-pg-perl
+        - libmojolicious-perl
+
     - name: compare wannadb
-      script: ./compare-source-version-between-repo-and-wannadb.pl
+      #action: update_wannadb SUITE=jessie-proposed-updates
+      update_wannadb: SUITE={{SUITE}}
+      #script: ./compare-source-version-between-repo-and-wannadb.pl
       register: out
 
     - debug: var=out
+    
